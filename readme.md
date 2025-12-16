@@ -13,3 +13,6 @@
 - Definir els servidors: rol, configuració i requisits mínims.
 - Llistar i documentar les aplicacions i tecnologies instal·lades (PHP, servidor web, SGBD, etc.).
 - Preparar un entorn mínim per al desenvolupament i proves (scripts d'instal·lació / notes de configuració).
+
+## Comanda per a conectar-se a la màquina
+ssh -i Baixades/Grupo5.pem ubuntu@54.161.47.236
