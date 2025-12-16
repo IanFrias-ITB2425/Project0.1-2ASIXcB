@@ -16,3 +16,6 @@
 
 ## Comanda per a conectar-se a la màquina
 ssh -i Baixades/Grupo5.pem ubuntu@54.161.47.236
+
+
+https://g5asixc2bc.com/
