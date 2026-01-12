@@ -65,5 +65,5 @@ Notes:
 ---
 
 ## NGINX
-- Fitxer de configuració al repositori: [Config NGINX (extagram)](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXc2BC/blob/main/files/files/nginx/extagram)
+- Fitxer de configuració al repositori: [Config NGINX (extagram)](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/files/nginx/extagram)
 ---
