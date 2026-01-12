@@ -19,10 +19,6 @@ Diagrama ràpid:
 Browser → [S1 LB] → { S2 extragram.php | S3 extragram.php | S4 upload.php | S5 images | S6 static } → S7 MySQL
 ```
 
-Diagrama visual:
-![Diagrama principal](image1)
-![Rols per servei](image2)
-
 Directoris/volums:
 - `uploads/` (imatges pujades)
 - `dbdata/` (dades MySQL)
