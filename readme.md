@@ -14,7 +14,6 @@
 - S6: NGINX servint CSS/JS/SVG (estàtic).
 - S7: MySQL (taula `posts`), dades persistents a `dbdata/`.
 
-Diagrama ràpid:
 ```
 Browser → [S1 LB] → { S2 extragram.php | S3 extragram.php | S4 upload.php | S5 images | S6 static } → S7 MySQL
 ```
