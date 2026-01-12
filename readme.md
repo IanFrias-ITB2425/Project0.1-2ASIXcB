@@ -1,21 +1,74 @@
-# Planificació Inicial
+# Planificació Inicial P0.1 ASIXcB G5
 
-**ProofHub:** https://itecbcn.proofhub.com/bapplite/#app/todos/project-9429814374/list-270271277074
+## Enllaços
+- Tasques (ProofHub): https://itecbcn.proofhub.com/bapplite/#app/todos/project-9429814374/list-270271277074
+- Web: https://g5asixc2bc.com/
 
-## Infraestructura
+---
 
-- Per al primer sprint, la infraestructura inicial es basarà en una instància **AWS t3.medium** (2 vCPUs, 4 GB de RAM).
-- Aquesta instància única s'utilitzarà per allotjar tant el PHP com la base de dades.
+## Arquitectura Inicial
+- S1: NGINX (proxy invers i balanceig) cap a S2/S3/S4/S5/S6.
+- S2 i S3: PHP-FPM executant `extragram.php` (part dinàmica).
+- S4: PHP-FPM amb `upload.php` (pujada d’imatges a `uploads/` i registre a BD).
+- S5: NGINX servint imatges des d’`uploads/` (estàtic).
+- S6: NGINX servint CSS/JS/SVG (estàtic).
+- S7: MySQL (taula `posts`), dades persistents a `dbdata/`.
 
-## Tasques inicials
+Diagrama ràpid:
+```
+Browser → [S1 LB] → { S2 extragram.php | S3 extragram.php | S4 upload.php | S5 images | S6 static } → S7 MySQL
+```
 
-- Pujar el codi de l'aplicació "extragram" al repositori git ja formatat i corregit.
-- Definir els servidors: rol, configuració i requisits mínims.
-- Llistar i documentar les aplicacions i tecnologies instal·lades (PHP, servidor web, SGBD, etc.).
-- Preparar un entorn mínim per al desenvolupament i proves (scripts d'instal·lació / notes de configuració).
+Diagrama visual:
+![Diagrama principal](image1)
+![Rols per servei](image2)
 
-## Comanda per a conectar-se a la màquina
+Directoris/volums:
+- `uploads/` (imatges pujades)
+- `dbdata/` (dades MySQL)
+
+---
+
+## Infraestructura (Sprint 1)
+- AWS EC2 t3.medium (2 vCPU, 4 GB RAM), Ubuntu.
+- Arrencada ràpida en una instància; arquitectura preparada per separar rols.
+
+---
+
+## Accés al servidor
+```bash
 ssh -i Baixades/Grupo5.pem ubuntu@54.161.47.236
+chmod 400 Baixades/Grupo5.pem
+```
 
+---
 
-https://g5asixc2bc.com/
+## Base de dades (en ús)
+```sql
+CREATE DATABASE extagram_db;
+CREATE USER 'extagram_admin'@'%' IDENTIFIED BY 'pass123';
+GRANT ALL PRIVILEGES ON extagram_db.* TO 'extagram_admin'@'%';
+FLUSH PRIVILEGES;
+
+CREATE TABLE extagram_db.posts (
+  post     TEXT,
+  photourl TEXT
+);
+```
+Notes:
+- En prod: contrasenya forta i restringir host (idealment `'localhost'`).
+- Backups: `mysqldump` diari + snapshot del volum `dbdata/`.
+
+---
+
+## Rutes del servei
+- GET `/`            → S2/S3: llista posts (DB).
+- POST `/upload`     → S4: desa imatge a `uploads/` + fila a DB.
+- GET `/images/...`  → S5: serveix imatges.
+- GET `/static/...`  → S6: serveix CSS/JS/SVG.
+
+---
+
+## NGINX
+- Fitxer de configuració al repositori: [Config NGINX (extagram)](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXc2BC/blob/main/files/files/nginx/extagram)
+---
