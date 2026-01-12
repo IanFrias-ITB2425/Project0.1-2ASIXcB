@@ -63,3 +63,11 @@ CREATE TABLE extagram_db.posts (
 ## NGINX
 - Fitxer de configuració al repositori: [Config NGINX (extagram)](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/files/nginx/extagram)
 ---
+
+## Canvis realitzats en el codi inicial
+
+- Backend i BD: Migració a PDO; esborrat en cascada a `delete_post.php` (elimina imatge, comentaris i post); noms d’arxiu únics amb `uniqid()` a `upload.php`; CRUD de comentaris amb `delete_comment.php`.
+- Interfície i UX (Tailwind): Disseny responsive; icones Heroicons; previsualització d’imatge en temps real; microinteraccions (hover i animacions en botons).
+- Servidor i configuració: Nginx amb blocs per HTTPS, certificats SSL i rutes d’estàtics (`/static`) i pujades (`/uploads`).
+
+---
