@@ -50,10 +50,6 @@ CREATE TABLE extagram_db.posts (
   photourl TEXT
 );
 ```
-Notes:
-- En prod: contrasenya forta i restringir host (idealment `'localhost'`).
-- Backups: `mysqldump` diari + snapshot del volum `dbdata/`.
-
 ---
 
 ## Rutes del servei
