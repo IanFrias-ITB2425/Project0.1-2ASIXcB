@@ -1,0 +1,48 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name g5asixc2bc.com www.g5asixc2bc.com;
+
+    # Redirecció permanent a HTTPS
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name g5asixc2bc.com www.g5asixc2bc.com;
+
+    root /var/www/extagram/public;
+    index index.php extagram.php;
+
+    # CONFIGURACIÓ SSL OFICIAL ("Let's Encrypt")
+    ssl_certificate /etc/letsencrypt/live/g5asixc2bc.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/g5asixc2bc.com/privkey.pem;
+
+    # Millores de seguretat SSL (recomanat)
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    # Backend PHP
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    }
+
+    # Imatges
+    location /uploads/ {
+        alias /var/www/extagram/uploads/;
+    }
+
+    # Estàtics (CSS/SVG)
+    location ~ \.(css|svg)$ {
+        root /var/www/extagram/static;
+    }
+
+    # Router
+    location / {
+        try_files $uri $uri/ /extagram.php?$query_string;
+    }
+}
