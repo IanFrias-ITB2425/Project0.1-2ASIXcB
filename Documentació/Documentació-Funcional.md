@@ -1,8 +1,8 @@
-# 📸 Extagram - Script de Desplegament Automatitzat
+# Extagram - Documentació Desplegament Automatitzat
 
-Aquest repositori conté un script de Bash (`Script_Funcional.sh`) dissenyat per automatitzar el desplegament de l'aplicació web **Extagram**. El script configura un servidor complet (LEMP Stack) i genera el codi font de l'aplicació des de zero.
+Amb el script (`Script_Funcional.sh`) està dissenyat per automatitzar el desplegament de l'aplicació web **Extagram**. El script configura un servidor complet (LEMP Stack) i genera el codi font de l'aplicació des de zero.
 
-## 📋 Índex
+## Índex
 - [Descripció del Projecte](#descripció-del-projecte)
 - [Requisits Previs](#requisits-previs)
 - [Instal·lació i Ús](#installació-i-ús)
@@ -12,7 +12,7 @@ Aquest repositori conté un script de Bash (`Script_Funcional.sh`) dissenyat per
 
 ---
 
-## 🚀 Descripció del Projecte
+## Descripció del Projecte
 
 El script realitza les següents tasques de forma seqüencial:
 1.  **Actualització del sistema:** `apt update`.
@@ -22,14 +22,14 @@ El script realitza les següents tasques de forma seqüencial:
 5.  **Configuració Nginx:** Crea un *Virtual Host* personalitzat per servir fitxers PHP i rutes estàtiques.
 6.  **Generació de Codi:** Crea dinàmicament els fitxers `.php`, `.css` i `.svg` necessaris per a l'aplicació.
 
-## 💻 Requisits Previs
+## Requisits Previs
 
 * Un servidor o màquina virtual amb **Ubuntu** (Recomanat 20.04 o 22.04).
 * Accés a internet per descarregar paquets.
 * Permisos de superusuari (`sudo`).
 * No tenir altres serveis ocupant el port 80 (Apache/Nginx previs) o el script els sobreescriurà/aturarà.
 
-## 🛠 Instal·lació i Ús
+## Instal·lació i Ús
 
 1.  **Descarregar el script** al servidor:
     ```bash
@@ -51,7 +51,7 @@ El script realitza les següents tasques de forma seqüencial:
     Al final de l'execució, el script mostrarà la IP pública. Obre el navegador i ves a:
     `http://LA_TEVA_IP`
 
-## 📂 Arquitectura del Sistema
+## Arquitectura del Sistema
 
 El script organitza l'aplicació en la següent estructura de directoris dins de `/var/www/extagram`:
 
