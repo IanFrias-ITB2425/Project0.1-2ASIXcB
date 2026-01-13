@@ -1,0 +1,10 @@
+# Ignorar fotos pujades pels usuaris (mantenint la carpeta)
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Ignorar fitxers de sistema i claus
+*.pem
+.DS_Store
+
+# Ignorar el fitxer de configuració real amb la pass123
+public/config.php
