@@ -5,7 +5,7 @@
 echo "--- 1. Generando Certificados SSL Autofirmados ---"
 
 # Creamos carpeta para certificados SSL si no existe
-'sudo mkdir -p /etc/nginx/ssl'
+´sudo mkdir -p /etc/nginx/ssl´
 
 # Generamos clave privada y certificado autofirmado (válido 365 días)
 # CN = IP pública del servidor
