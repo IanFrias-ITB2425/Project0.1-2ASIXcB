@@ -51,7 +51,7 @@ CREATE TABLE extagram_db.posts (
 );
 ```
 
-> Esquema detallat a: [`sql/schema.sql`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/sql/schema.sql)
+> Esquema detallat a: [`/files/sql/schema.sql`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/sql/schema.sql)
 
 ---
 
@@ -77,7 +77,7 @@ CREATE TABLE extagram_db.posts (
 
 ## Certificats i Let's Encrypt
 
-Certificats generats amb Let’s Encrypt i emmagatzemats al repo (entorn de proves/demo):
+Certificats generats amb Let’s Encrypt i emmagatzemats al repositori:
 
 - Certificat complet (cadena):  
   - [`files/etc/letsencrypt/live/g5asixc2bc.com/fullchain.pem`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/files/etc/letsencrypt/live/g5asixc2bc.com/fullchain.pem)
