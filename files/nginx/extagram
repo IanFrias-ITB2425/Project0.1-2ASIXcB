@@ -1,48 +1,58 @@
 server {
-    listen 80;
-    listen [::]:80;
-    server_name g5asixc2bc.com www.g5asixc2bc.com;
-
-    # Redirecció permanent a HTTPS
-    location / {
-        return 301 https://$host$request_uri;
-    }
-}
-
-server {
     listen 443 ssl;
     listen [::]:443 ssl;
     server_name g5asixc2bc.com www.g5asixc2bc.com;
 
+    # Arrel del projecte (on hi ha els fitxers PHP)
     root /var/www/extagram/public;
     index index.php extagram.php;
 
-    # CONFIGURACIÓ SSL OFICIAL ("Let's Encrypt")
+    # CONFIGURACIÓ SSL OFICIAL (Let's Encrypt)
     ssl_certificate /etc/letsencrypt/live/g5asixc2bc.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/g5asixc2bc.com/privkey.pem;
-
-    # Millores de seguretat SSL (recomanat)
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
 
-    # Backend PHP
+    # 1. GESTIÓ DE RUTES (Substitueix la redirecció 301 trencada)
+    location / {
+        # Aquesta línia permet que si algú posa "interact", Nginx busqui "interact.php" 
+        # internament SENSE fer una redirecció que trenqui el mètode POST.
+        try_files $uri $uri/ $uri.php @static_files;
+    }
+
+    # 2. CERCA DE FITXERS ESTÀTICS (.svg, .css, .js)
+    location @static_files {
+        root /var/www/extagram/static;
+        try_files $uri $uri.svg $uri.css $uri.js /extagram.php?$query_string;
+    }
+
+    # 3. BACKEND PHP (Processament de script)
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
+        # Comprova que la versió de PHP sigui la 8.3 realment activa
         fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        
+        # Paràmetres per evitar talls en càrregues grans
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
     }
 
-    # Imatges
+    # 4. CARPETA UPLOADS (Imatges reals)
     location /uploads/ {
         alias /var/www/extagram/uploads/;
+        expires 30d;
+        add_header Cache-Control "public, no-transform";
     }
 
-    # Estàtics (CSS/SVG)
-    location ~ \.(css|svg)$ {
-        root /var/www/extagram/static;
+    # 5. SEGURETAT (Opcional: No permetre veure fitxers ocults com .db o .git)
+    location ~ /\. {
+        deny all;
     }
+}
 
-    # Router
-    location / {
-        try_files $uri $uri/ /extagram.php?$query_string;
-    }
+# REDIRECCIÓ DE HTTP A HTTPS
+server {
+    listen 80;
+    server_name g5asixc2bc.com www.g5asixc2bc.com;
+    return 301 https://$host$request_uri;
 }
