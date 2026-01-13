@@ -1,24 +1,22 @@
 #!/bin/bash
-################################################################################
-# Script de configuración HTTPS + NGINX + CSS para el proyecto "Extagram"
-# ------------------------------------------------------------------------------
+###############################################################################
+# EXTAGRAM - SCRIPT DE CONFIGURACIÓN AUTOMÁTICA
+# -----------------------------------------------------------------------------
 # Este script realiza las siguientes tareas:
 # 1. Genera certificados SSL autofirmados
 # 2. Configura NGINX para forzar HTTPS
 # 3. Detecta automáticamente la versión de PHP instalada
-# 4. Aplica un diseño CSS moderno estilo “premium”
+# 4. Aplica un diseño CSS moderno tipo red social
 # 5. Reinicia NGINX para aplicar los cambios
-#
-# Pensado para sistemas GNU/Linux (Ubuntu / Debian)
-################################################################################
+###############################################################################
 
 
-################################################################################
+###############################################################################
 # 1. GENERACIÓN DE CERTIFICADOS SSL AUTOFIRMADOS
-################################################################################
+###############################################################################
 
 echo "--- 1. Generando Certificados SSL Autofirmados ---"
-# Mensaje informativo en consola
+# Mensaje informativo para el usuario
 
 sudo mkdir -p /etc/nginx/ssl
 # Crea el directorio donde se almacenarán los certificados SSL
@@ -26,48 +24,47 @@ sudo mkdir -p /etc/nginx/ssl
 
 sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 # Genera un certificado SSL autofirmado:
-# -x509      → Certificado autofirmado
-# -nodes     → Clave privada sin contraseña
-# -days 365  → Validez de 1 año
-# -newkey    → Genera una nueva clave RSA de 2048 bits
+# -x509     → Certificado autofirmado
+# -nodes    → Clave privada sin contraseña
+# -days     → Validez de 365 días
+# rsa:2048  → Clave RSA de 2048 bits
     -keyout /etc/nginx/ssl/nginx.key \
-    # Ruta donde se guarda la clave privada
+    # Ruta de la clave privada
     -out /etc/nginx/ssl/nginx.crt \
-    # Ruta donde se guarda el certificado público
+    # Ruta del certificado público
     -subj "/C=ES/ST=Barcelona/L=Barcelona/O=Extagram/OU=IT/CN=$(curl -s ifconfig.me)"
-    # Información del certificado:
+    # Datos del certificado:
     # C  → País
     # ST → Provincia
     # L  → Ciudad
     # O  → Organización
     # OU → Unidad organizativa
-    # CN → Common Name (IP pública del servidor)
+    # CN → IP pública del servidor
 
 
-################################################################################
+###############################################################################
 # 2. CONFIGURACIÓN DE NGINX PARA HTTPS
-################################################################################
+###############################################################################
 
 echo "--- 2. Reconfigurando NGINX para HTTPS ---"
-# Mensaje informativo
+# Indica el inicio de la configuración de NGINX
 
 PHP_VER=$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;")
 # Detecta automáticamente la versión de PHP instalada (ej: 8.1)
-# Se usará para apuntar correctamente al socket PHP-FPM
 
 sudo bash -c "cat << 'EOF' > /etc/nginx/sites-available/extagram
-################################################################################
-# CONFIGURACIÓN DEL VIRTUAL HOST DE NGINX PARA EXTAGRAM
-################################################################################
+###############################################################################
+# NGINX - VIRTUAL HOST EXTAGRAM
+###############################################################################
 
-# SERVIDOR HTTP (PUERTO 80)
+# Servidor HTTP (puerto 80)
 server {
     listen 80;                               # Escucha tráfico HTTP
     server_name _;                          # Acepta cualquier dominio/IP
-    return 301 https://\$host\$request_uri; # Redirige todo a HTTPS
+    return 301 https://\$host\$request_uri; # Redirección permanente a HTTPS
 }
 
-# SERVIDOR HTTPS (PUERTO 443)
+# Servidor HTTPS (puerto 443)
 server {
     listen 443 ssl;                         # Escucha en HTTPS
     server_name _;                          # Acepta cualquier dominio/IP
@@ -75,76 +72,74 @@ server {
     root /var/www/extagram/public;          # Directorio raíz del proyecto
     index index.php extagram.php;           # Archivos índice
 
-    # CERTIFICADOS SSL
+    # Certificados SSL
     ssl_certificate /etc/nginx/ssl/nginx.crt;
     ssl_certificate_key /etc/nginx/ssl/nginx.key;
 
-    # MANEJO DE ARCHIVOS PHP CON PHP-FPM
+    # Manejo de archivos PHP con PHP-FPM
     location ~ \.php$ {
-        include snippets/fastcgi-php.conf;  # Configuración FastCGI estándar
+        include snippets/fastcgi-php.conf;
         fastcgi_pass unix:/run/php/php$PHP_VER-fpm.sock;
-        # Usa el socket PHP-FPM según la versión detectada
     }
 
-    # DIRECTORIO DE IMÁGENES SUBIDAS
+    # Archivos subidos por los usuarios
     location /uploads/ {
-        alias /var/www/extagram/uploads/;   # Ruta real del sistema
+        alias /var/www/extagram/uploads/;
     }
 
-    # ARCHIVOS ESTÁTICOS (CSS, SVG)
+    # Archivos estáticos (CSS, SVG)
     location ~ \.(css|svg)$ {
-        root /var/www/extagram/static;      # Carpeta de recursos estáticos
+        root /var/www/extagram/static;
     }
 
-    # ROUTER FRONTAL
+    # Router frontal
     location / {
         try_files \$uri \$uri/ /extagram.php;
-        # Si el archivo no existe, redirige al router principal en PHP
     }
 }
 EOF"
 
 
-################################################################################
-# 3. APLICACIÓN DEL DISEÑO "PREMIUM" (CSS)
-################################################################################
+###############################################################################
+# 3. APLICACIÓN DEL DISEÑO VISUAL (CSS)
+###############################################################################
 
 echo "--- 3. Aplicando Diseño 'Premium' (Nuevo CSS) ---"
-# Mensaje informativo
+# Indica que se va a aplicar el nuevo diseño visual
 
 sudo bash -c "cat << 'EOF' > /var/www/extagram/static/style.css
 /* ============================================================================
-   HOJA DE ESTILOS PRINCIPAL - EXTAGRAM
+   EXTAGRAM - HOJA DE ESTILOS PRINCIPAL
    Diseño moderno inspirado en redes sociales
    ========================================================================== */
 
-/* Importación de fuente moderna desde Google Fonts */
+/* Fuente moderna */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
-/* ESTILOS GENERALES */
+/* Estilos generales */
 body {
-    background: #f0f2f5;                    /* Fondo claro */
-    font-family: 'Poppins', sans-serif;     /* Fuente global */
-    margin: 0;                              /* Elimina márgenes */
-    color: #333;                            /* Color del texto */
-    padding-bottom: 50px;                   /* Espacio inferior */
+    background: #f0f2f5;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    color: #333;
+    padding-bottom: 50px;
 }
 
-/* HEADER SIMULADO */
+/* Header simulado */
 body::before {
-    content: 'Extagram';                    /* Título del sitio */
+    content: 'Extagram';
     display: block;
     background: white;
     text-align: center;
     padding: 15px;
     font-weight: 600;
     font-size: 1.5rem;
-    color: #405de6;                         /* Color corporativo */
+    color: #405de6;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     margin-bottom: 30px;
 }
 
-/* FORMULARIO DE SUBIDA */
+/* Formulario */
 form {
     background: white;
     max-width: 500px;
@@ -152,79 +147,68 @@ form {
     padding: 30px;
     border-radius: 15px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5em;
 }
 
-/* CAMPOS DE TEXTO */
+/* Campos de texto */
 input[type=text] {
     width: 100%;
-    padding: 12px 15px;
+    padding: 12px;
     border: 2px solid #eee;
     border-radius: 8px;
-    font-size: 1rem;
 }
 
-/* BOTÓN PRINCIPAL */
+/* Botón principal */
 input[type=submit] {
     background: linear-gradient(45deg, #405de6, #5851db, #833ab4);
     color: white;
-    border: 0;
-    border-radius: 8px;
-    width: 100%;
+    border: none;
     padding: 12px;
+    border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
 }
 
-/* TARJETAS DE PUBLICACIONES */
+/* Publicaciones */
 .post {
     background: white;
     max-width: 500px;
     margin: 0 auto 30px auto;
     border-radius: 15px;
-    overflow: hidden;
     box-shadow: 0 5px 15px rgba(0,0,0,0.03);
 }
 
-/* TEXTO DE LA PUBLICACIÓN */
-.post p {
-    padding: 20px;
-    margin: 0;
-}
-
-/* IMAGEN DEL POST */
 .post img {
     width: 100%;
     display: block;
 }
 
-/* FOOTER SIMULADO */
+.post p {
+    padding: 20px;
+}
+
+/* Footer simulado */
 .post::after {
     content: '❤️ Like   💬 Comment';
     display: block;
-    padding: 15px 20px;
+    padding: 15px;
     border-top: 1px solid #f0f0f0;
     color: #666;
     font-size: 0.85rem;
-    font-weight: 600;
 }
 EOF"
 
 
-################################################################################
+###############################################################################
 # 4. REINICIO DEL SERVIDOR
-################################################################################
+###############################################################################
 
 echo "--- 4. Reiniciando Servidor ---"
-# Mensaje informativo
+# Indica que se aplicarán los cambios
 
 sudo systemctl restart nginx
-# Reinicia NGINX para aplicar la nueva configuración
+# Reinicia NGINX para cargar la nueva configuración
 
 echo "¡Hecho! Accede ahora usando HTTPS: https://$(curl -s ifconfig.me)"
-# Muestra la URL final del servidor con HTTPS activo
-################################################################################
+# Muestra la URL final con HTTPS activo
+###############################################################################
 
