@@ -1,92 +1,76 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+/* 1. Reset i Tipografia Bàsica */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+:root {
+    --indigo-600: #4f46e5;
+    --indigo-700: #4338ca;
+    --slate-50: #f8fafc;
+    --slate-200: #e2e8f0;
+}
 
 body {
-    background-color: #f0f2f5;
-    font-family: 'Inter', sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     margin: 0;
-    padding: 20px 0;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--slate-50); /* bg-slate-50 */
+    color: #1e293b;
 }
 
-/* Tarjeta de Post y Formulario de Subida */
-form, .post {
-    background: #fff;
-    width: 95%;
-    max-width: 500px;
-    margin-bottom: 20px;
-    border-radius: 15px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    overflow: hidden; /* Esto evita que el contenido pase el bloque */
-    border: 1px solid #e4e6eb;
-}
+/* 2. Suport per a classes Tailwind (Estructures) */
+.max-w-md { width: 100%; max-width: 448px; margin: 0 auto; }
+.bg-white { background-color: #ffffff; }
+.rounded-2xl { border-radius: 1rem; }
+.rounded-3xl { border-radius: 1.5rem; }
+.shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+.border { border: 1px solid var(--slate-200); }
+.p-6 { padding: 1.5rem; }
+.p-5 { padding: 1.25rem; }
+.mb-12 { margin-bottom: 3rem; }
+.space-y-4 > * + * { margin-top: 1rem; }
+.space-y-10 > * + * { margin-top: 2.5rem; }
 
-/* Imagen principal centrada */
-.post img {
+/* 3. Inputs i Botons (Selectors d'atribut per estalviar classes) */
+input[type="text"], input[type="file"] {
     width: 100%;
-    display: block;
-    object-fit: cover;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--slate-200);
+    background-color: #f1f5f9;
 }
 
-/* Contenedor de interacciones */
-.post-footer {
-    padding: 12px;
-}
-
-.like-section {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding-bottom: 10px;
-}
-
-/* Botón Like circular como en tu captura */
-.like-badge {
-    background: #f8f9fa;
-    border: 1px solid #efefef;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 600;
+button[type="submit"] {
+    background-color: var(--indigo-600);
+    color: white;
+    font-weight: 700;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    border: none;
     cursor: pointer;
+    width: 100%;
     transition: background 0.2s;
 }
 
-.like-badge:hover { background: #e4e6eb; }
-
-/* Comentarios */
-.comments-list {
-    background: #fcfcfc;
-    padding: 10px;
-    font-size: 13px;
-    border-top: 1px solid #f0f2f5;
+button[type="submit"]:hover {
+    background-color: var(--indigo-700);
 }
 
-.comment-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 10px;
-    background: #fff;
-    border-top: 1px solid #f0f2f5;
+/* 4. Estils del Post */
+article {
+    overflow: hidden;
+    position: relative;
 }
 
-.comment-input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #dbdbdb;
-    border-radius: 8px;
-    box-sizing: border-box;
-}
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.space-x-3 > * + * { margin-left: 0.75rem; }
 
-.post-btn {
-    align-self: center;
-    background: #6259d2; /* Morado de tu captura */
-    color: white;
-    border: none;
-    padding: 8px 25px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-}
+img { max-width: 100%; height: auto; }
+
+/* 5. Especial: L'àrea de Like i Comentaris */
+.bg-indigo-50 { background-color: #eef2ff; color: var(--indigo-600); }
+.text-indigo-600 { color: var(--indigo-600); }
+.font-bold { font-weight: 700; }
+
+/* 6. Scrollbar Personalitzat (Ja el tenies al PHP, però aquí assegures el fallback) */
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
