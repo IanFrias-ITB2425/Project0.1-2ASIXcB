@@ -1,18 +1,18 @@
 
-# Script para configurar Extagram con NGINX, HTTPS y CSS Premium
+## Script para configurar Extagram con NGINX, HTTPS y CSS Premium
 
 `echo "--- 1. Generando Certificados SSL Autofirmados ---"`
 
-# Creamos carpeta para certificados SSL si no existe
+## Creamos carpeta para certificados SSL si no existe
 
 `sudo mkdir -p /etc/nginx/ssl`
 
-# Generamos clave privada y certificado autofirmado (válido 365 días)
-# CN = IP pública del servidor
-sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+## Generamos clave privada y certificado autofirmado (válido 365 días)
+## CN = IP pública del servidor
+`sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout /etc/nginx/ssl/nginx.key \
     -out /etc/nginx/ssl/nginx.crt \
-    -subj "/C=ES/ST=Barcelona/L=Barcelona/O=Extagram/OU=IT/CN=$(curl -s ifconfig.me)"
+    -subj "/C=ES/ST=Barcelona/L=Barcelona/O=Extagram/OU=IT/CN=$(curl -s ifconfig.me)"`
 
 echo "--- 2. Reconfigurando NGINX para HTTPS ---"
 
@@ -64,7 +64,7 @@ EOF"
 echo "--- 3. Aplicando Diseño 'Premium' (Nuevo CSS) ---"
 
 # Crear archivo CSS con diseño moderno tipo Instagram
-sudo bash -c "cat << 'EOF' > /var/www/extagram/static/style.css
+`sudo bash -c "cat << 'EOF' > /var/www/extagram/static/style.css`
 
 /* Importamos fuente moderna 'Poppins' desde Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
@@ -206,9 +206,9 @@ EOF"
 echo "--- 4. Reiniciando Servidor ---"
 
 # Reiniciamos NGINX para aplicar los cambios
-sudo systemctl restart nginx
+`sudo systemctl restart nginx`
 
 # Mostrar URL de acceso
-echo "¡Hecho! Accede ahora usando HTTPS: https://$(curl -s ifconfig.me)"
+`echo "¡Hecho! Accede ahora usando HTTPS: https://$(curl -s ifconfig.me)"`
 
 
