@@ -51,7 +51,7 @@ CREATE TABLE extagram_db.posts (
 );
 ```
 
-> Esquema detallat a: [`/files/sql/schema.sql`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/sql/schema.sql)
+> Esquema detallat a: [`files/sql/schema.sql`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/sql/schema.sql)
 
 ---
 
