@@ -1,8 +1,7 @@
-# -------------------------------------------------------
-# Script para configurar Extagram con NGINX, HTTPS y CSS Premium
-# -------------------------------------------------------
 
-echo "--- 1. Generando Certificados SSL Autofirmados ---"
+# Script para configurar Extagram con NGINX, HTTPS y CSS Premium
+
+`echo "--- 1. Generando Certificados SSL Autofirmados ---"`
 
 # Creamos carpeta para certificados SSL si no existe
 
@@ -36,29 +35,29 @@ server {
     index index.php extagram.php;
 
 # Certificados SSL
-    ssl_certificate /etc/nginx/ssl/nginx.crt;
-    ssl_certificate_key /etc/nginx/ssl/nginx.key;
+    `ssl_certificate /etc/nginx/ssl/nginx.crt;`
+    `ssl_certificate_key /etc/nginx/ssl/nginx.key;`
 
 # Backend PHP con PHP-FPM
-    location ~ \.php$ {
+    `location ~ \.php$ {
         include snippets/fastcgi-php.conf;
         fastcgi_pass unix:/run/php/php$PHP_VER-fpm.sock;
-    }
+    }`
 
 # Carpeta de imágenes subidas por usuarios
-    location /uploads/ {
+    `location /uploads/ {
         alias /var/www/extagram/uploads/;
-    }
+    }`
 
 # Archivos estáticos (CSS y SVG)
-    location ~ \.(css|svg)$ {
+    `location ~ \.(css|svg)$ {
         root /var/www/extagram/static;
-    }
+    }`
 
 # Router principal
-    location / {
+    `location / {
         try_files \$uri \$uri/ /extagram.php;
-    }
+    }`
 }
 EOF"
 
@@ -66,6 +65,7 @@ echo "--- 3. Aplicando Diseño 'Premium' (Nuevo CSS) ---"
 
 # Crear archivo CSS con diseño moderno tipo Instagram
 sudo bash -c "cat << 'EOF' > /var/www/extagram/static/style.css
+
 /* Importamos fuente moderna 'Poppins' desde Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
