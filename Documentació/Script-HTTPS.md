@@ -35,27 +35,27 @@ server {
     root /var/www/extagram/public;
     index index.php extagram.php;
 
-    # Certificados SSL
+# Certificados SSL
     ssl_certificate /etc/nginx/ssl/nginx.crt;
     ssl_certificate_key /etc/nginx/ssl/nginx.key;
 
-    # Backend PHP con PHP-FPM
+# Backend PHP con PHP-FPM
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
         fastcgi_pass unix:/run/php/php$PHP_VER-fpm.sock;
     }
 
-    # Carpeta de imágenes subidas por usuarios
+# Carpeta de imágenes subidas por usuarios
     location /uploads/ {
         alias /var/www/extagram/uploads/;
     }
 
-    # Archivos estáticos (CSS y SVG)
+# Archivos estáticos (CSS y SVG)
     location ~ \.(css|svg)$ {
         root /var/www/extagram/static;
     }
 
-    # Router principal
+# Router principal
     location / {
         try_files \$uri \$uri/ /extagram.php;
     }
