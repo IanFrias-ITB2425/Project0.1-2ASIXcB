@@ -13,10 +13,7 @@
 - S5: NGINX servint imatges des d’`uploads/` (estàtic).
 - S6: NGINX servint CSS/JS/SVG (estàtic).
 - S7: MySQL (taula `posts`), dades persistents a `dbdata/`.
-
-```
-Browser → [S1 LB] → { S2 extragram.php | S3 extragram.php | S4 upload.php | S5 images | S6 static } → S7 MySQL
-```
+<img width="620" height="658" alt="Captura de pantalla de 2026-01-13 15-45-28" src="https://github.com/user-attachments/assets/e1185035-66a8-4d61-a5f0-bc0377b435d9" />
 
 Directoris/volums:
 - `uploads/` (imatges pujades)
