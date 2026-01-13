@@ -7,17 +7,20 @@
 ---
 
 ## Arquitectura Inicial
+<img align="right" width="320" alt="Captura Arquitectura" src="https://github.com/user-attachments/assets/e1185035-66a8-4d61-a5f0-bc0377b435d9" />
+
 - S1: NGINX (proxy invers i balanceig) cap a S2/S3/S4/S5/S6.
 - S2 i S3: PHP-FPM executant `extragram.php` (part dinàmica).
 - S4: PHP-FPM amb `upload.php` (pujada d’imatges a `uploads/` i registre a BD).
 - S5: NGINX servint imatges des d’`uploads/` (estàtic).
 - S6: NGINX servint CSS/JS/SVG (estàtic).
 - S7: MySQL (taula `posts`), dades persistents a `dbdata/`.
-<img width="620" height="658" alt="Captura de pantalla de 2026-01-13 15-45-28" src="https://github.com/user-attachments/assets/e1185035-66a8-4d61-a5f0-bc0377b435d9" />
 
 Directoris/volums:
 - `uploads/` (imatges pujades)
 - `dbdata/` (dades MySQL)
+
+<br clear="right" />
 
 ---
 
