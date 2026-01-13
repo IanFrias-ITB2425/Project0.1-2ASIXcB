@@ -1,1 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
+body {
+    background-color: #f0f2f5;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 20px 0;
+}
+
+/* Tarjeta de Post y Formulario de Subida */
+form, .post {
+    background: #fff;
+    width: 95%;
+    max-width: 500px;
+    margin-bottom: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    overflow: hidden; /* Esto evita que el contenido pase el bloque */
+    border: 1px solid #e4e6eb;
+}
+
+/* Imagen principal centrada */
+.post img {
+    width: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+/* Contenedor de interacciones */
+.post-footer {
+    padding: 12px;
+}
+
+.like-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 10px;
+}
+
+/* Botón Like circular como en tu captura */
+.like-badge {
+    background: #f8f9fa;
+    border: 1px solid #efefef;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.like-badge:hover { background: #e4e6eb; }
+
+/* Comentarios */
+.comments-list {
+    background: #fcfcfc;
+    padding: 10px;
+    font-size: 13px;
+    border-top: 1px solid #f0f2f5;
+}
+
+.comment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    background: #fff;
+    border-top: 1px solid #f0f2f5;
+}
+
+.comment-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #dbdbdb;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.post-btn {
+    align-self: center;
+    background: #6259d2; /* Morado de tu captura */
+    color: white;
+    border: none;
+    padding: 8px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
