@@ -198,7 +198,7 @@ Fichers PHP principals (publicats a `public/`):
 - PHP OPcache: https://www.php.net/opcache
 - Nginx docs: https://nginx.org/en/docs/
 
-> Punts d’entrada del projecte: [`public/`](../public/) · Config de servidor: [`files/nginx/`](../files/nginx/) · Scripts: [`files/scripts/`](../files/scripts/)
+> Punts d’entrada del projecte: [`public/`](/public/) · Config de servidor: [`files/nginx/`](/files/nginx/) · Scripts: [`files/scripts/`](/files/scripts/)
 
 # DNS a Cloudflare
 
