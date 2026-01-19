@@ -126,9 +126,6 @@ Fichers PHP principals (publicats a `public/`):
 
 # Canvis realitzats en el codi inicial
 
-> Estat del projecte  
-> ![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?logo=php&logoColor=white) ![Server](https://img.shields.io/badge/Servidor-Apache2%20%7C%20Nginx-0A0A0A) ![Tailwind](https://img.shields.io/badge/TailwindCSS-3.x-38B2AC?logo=tailwindcss&logoColor=white) ![Cloudflare](https://img.shields.io/badge/CDN-Cloudflare-F38020?logo=cloudflare&logoColor=white) ![DB](https://img.shields.io/badge/BD-MySQL%20%7C%20MariaDB-4479A1?logo=mysql&logoColor=white)
-
 ## Backend i Base de Dades
 - Migració a PDO a [`public/db_conn.php`](../public/db_conn.php) i als scripts principals ([`public/extagram.php`](../public/extagram.php), [`public/upload.php`](../public/upload.php), etc.).
   - Consultes preparades (protecció contra SQL Injection).
@@ -143,7 +140,7 @@ Fichers PHP principals (publicats a `public/`):
 ## Interfície i UX (Tailwind + CSS propi)
 - Maquetació responsive amb Tailwind a les vistes de [`public/`](../public/).
 - Ús d’icones (Heroicons) i components moderns a les vistes principals.
-- Millores d’UX a [`public/static/style.css`](../public/static/style.css):
+- Millores d���UX a [`public/static/style.css`](../public/static/style.css):
   - Previsualització d’imatge en temps real.
   - Microinteraccions: efectes de hover i petites animacions en botons.
 
@@ -153,7 +150,7 @@ Fichers PHP principals (publicats a `public/`):
 - Nginx amb HTTPS (Let’s Encrypt) i rutes:
   - Estàtics: `/static`
   - Pujades: `/uploads`
-  - Arxiu de configuració: [`files/nginx/extagram`](../files/nginx/extagram)
+  - Arxiu de configuració: [`files/nginx/extagram`](../files/nginx/extagram) (ruta del projecte: `Project0.1-2ASIXcB/files/nginx/extagram`)
 - Scripts d’automatització:
   - [`files/scripts/Script-HTTPS.sh`](../files/scripts/Script-HTTPS.sh) (configuració HTTPS i certificats).
   - [`files/scripts/Script_Funcional.sh`](../files/scripts/Script_Funcional.sh) (posada en marxa, permisos, estructura de carpetes, reload, etc.).
@@ -162,11 +159,13 @@ Fichers PHP principals (publicats a `public/`):
 
 # Justificació tecnològica
 
-## Apache2
-- Experiència i comoditat: és el servidor amb què tenim més pràctica.
-- `.htaccess`: canvis de rutes i permisos de forma intuïtiva.
-- Integració amb PHP via `mod_php` (sense haver de muntar PHP-FPM).
-- Seguretat pràctica: dominar l’eina redueix errors de configuració.
+## Nginx (Servidor web)
+- Arquitectura esdeveniment-driven: rendiment alt i consum de memòria contingut.
+- Integració amb PHP-FPM: separa el servidor web del processador PHP per estabilitat i escalar fàcilment.
+- Server blocks i rutes dedicades (`/static`, `/uploads`) per servir contingut eficientment.
+- HTTP/2, compressió i headers de caché senzills de definir.
+- TLS amb Let’s Encrypt i compatibilitat amb Cloudflare com a proxy/frontal.
+- Config real del projecte a [`files/nginx/extagram`](../files/nginx/extagram).
 
 ## PHP 8.3
 - Rendiment superior (JIT) respecte a 7.x.
@@ -198,7 +197,6 @@ Fichers PHP principals (publicats a `public/`):
 - PHP PDO: https://www.php.net/manual/en/book.pdo.php
 - PHP OPcache: https://www.php.net/opcache
 - Nginx docs: https://nginx.org/en/docs/
-- Apache HTTP Server: https://httpd.apache.org/docs/
 
 > Punts d’entrada del projecte: [`public/`](../public/) · Config de servidor: [`files/nginx/`](../files/nginx/) · Scripts: [`files/scripts/`](../files/scripts/)
 
