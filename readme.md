@@ -124,68 +124,84 @@ Fichers PHP principals (publicats a `public/`):
 
 ---
 
-## Canvis realitzats en el codi inicial
+# Canvis realitzats en el codi inicial
 
-### 1.1 Backend i Base de Dades
-- Migració a PDO a `public/db_conn.php` i als scripts principals (`extagram.php`, `upload.php`, etc.).
+> Estat del projecte  
+> ![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?logo=php&logoColor=white) ![Server](https://img.shields.io/badge/Servidor-Apache2%20%7C%20Nginx-0A0A0A) ![Tailwind](https://img.shields.io/badge/TailwindCSS-3.x-38B2AC?logo=tailwindcss&logoColor=white) ![Cloudflare](https://img.shields.io/badge/CDN-Cloudflare-F38020?logo=cloudflare&logoColor=white) ![DB](https://img.shields.io/badge/BD-MySQL%20%7C%20MariaDB-4479A1?logo=mysql&logoColor=white)
+
+## Backend i Base de Dades
+- Migració a PDO a [`public/db_conn.php`](../public/db_conn.php) i als scripts principals ([`public/extagram.php`](../public/extagram.php), [`public/upload.php`](../public/upload.php), etc.).
   - Consultes preparades (protecció contra SQL Injection).
   - Codi més net i mantenible.
-- Esborrat en cascada a `public/delete_post.php`:
+- Esborrat en cascada a [`public/delete_post.php`](../public/delete_post.php):
   - Elimina la imatge del sistema de fitxers, els comentaris associats i el post de BD.
-- Noms d’arxiu únics amb `uniqid()` a `public/upload.php` per evitar col·lisions i sobrescriptures.
+- Noms d’arxiu únics amb `uniqid()` a [`public/upload.php`](../public/upload.php) per evitar col·lisions i sobrescriptures.
 - CRUD de comentaris:
-  - `public/delete_comment.php` per eliminar comentaris.
-  - Lògica a `public/interact.php` per crear, llistar i eliminar comentaris.
+  - [`public/delete_comment.php`](../public/delete_comment.php) per eliminar comentaris.
+  - Lògica a [`public/interact.php`](../public/interact.php) per crear, llistar i eliminar comentaris.
 
-### 1.2 Interfície i UX (Tailwind + CSS propi)
-- Maquetació responsive amb Tailwind a les vistes de `public/`.
+## Interfície i UX (Tailwind + CSS propi)
+- Maquetació responsive amb Tailwind a les vistes de [`public/`](../public/).
 - Ús d’icones (Heroicons) i components moderns a les vistes principals.
-- Millores d’UX a `public/static/style.css`:
+- Millores d’UX a [`public/static/style.css`](../public/static/style.css):
   - Previsualització d’imatge en temps real.
   - Microinteraccions: efectes de hover i petites animacions en botons.
 
-### 1.3 Servidor i Configuració
+> Carpeta d’estàtics: [`public/static/`](../public/static/) · Carpeta de pujades: `public/uploads/` (generada en execució).
+
+## Servidor i Configuració
 - Nginx amb HTTPS (Let’s Encrypt) i rutes:
   - Estàtics: `/static`
   - Pujades: `/uploads`
-  - Arxiu de configuració: `files/nginx/extagram`
+  - Arxiu de configuració: [`files/nginx/extagram`](../files/nginx/extagram)
 - Scripts d’automatització:
-  - `files/scripts/Script-HTTPS.sh` (configuració HTTPS i certificats).
-  - `files/scripts/Script_Funcional.sh` (posada en marxa, permisos, estructura de carpetes, reload, etc.).
+  - [`files/scripts/Script-HTTPS.sh`](../files/scripts/Script-HTTPS.sh) (configuració HTTPS i certificats).
+  - [`files/scripts/Script_Funcional.sh`](../files/scripts/Script_Funcional.sh) (posada en marxa, permisos, estructura de carpetes, reload, etc.).
 
 ---
 
-## 2) Justificació tecnològica
+# Justificació tecnològica
 
-### 2.1 Apache2 (Servidor web)
+## Apache2
 - Experiència i comoditat: és el servidor amb què tenim més pràctica.
 - `.htaccess`: canvis de rutes i permisos de forma intuïtiva.
 - Integració amb PHP via `mod_php` (sense haver de muntar PHP-FPM).
 - Seguretat pràctica: dominar l’eina redueix errors de configuració.
 
-### 2.2 PHP 8.3 (Motor)
+## PHP 8.3
 - Rendiment superior (JIT) respecte a 7.x.
 - OPcache actiu per respostes més ràpides.
 - Sintaxi moderna que facilita manteniment i seguretat del codi.
 
-### 2.3 Cloudflare (Seguretat i rendiment)
+## Cloudflare
 - SSL fàcil i gratuït sense complicar el servidor.
 - Amaga la IP real de la instància, dificultant atacs directes.
 - CDN i caché per servir estàtics des del node més proper a l’usuari.
 
-### 2.4 UI-Avatars API (Identitat visual)
+## UI-Avatars API
 - Estalvi d’espai en disc (no calen avatars genèrics al servidor).
 - Zero manteniment i bona experiència d’usuari des del primer moment.
 
-### 2.5 Tailwind CSS (Productivitat d’estil)
+## Tailwind CSS
 - Disseny ràpid amb utilitats (`rounded-full`, `shadow-md`, `flex`, etc.).
 - Manteniment senzill (evitem un únic CSS gegant).
 - Consistència visual a tot el frontend.
 
 ---
 
-## 3) DNS a Cloudflare
+# Enllaços útils (APIs i docs)
+- Tailwind CSS: https://tailwindcss.com/docs
+- Heroicons: https://heroicons.com/
+- UI-Avatars API: https://ui-avatars.com/
+- Cloudflare (DNS, Proxy, SSL/TLS): https://dash.cloudflare.com/
+- Let’s Encrypt (ACME): https://letsencrypt.org/
+- PHP PDO: https://www.php.net/manual/en/book.pdo.php
+- PHP OPcache: https://www.php.net/opcache
+- Nginx docs: https://nginx.org/en/docs/
+- Apache HTTP Server: https://httpd.apache.org/docs/
 
-<img width="1261" height="337" alt="Captura de pantalla de 2026-01-19 15-50-41" src="https://github.com/user-attachments/assets/6631ead1-5c19-4aaf-82a7-db34120872d4" />
+> Punts d’entrada del projecte: [`public/`](../public/) · Config de servidor: [`files/nginx/`](../files/nginx/) · Scripts: [`files/scripts/`](../files/scripts/)
 
----
+# DNS a Cloudflare
+
+<img width="1261" height="337" alt="Captura de pantalla de 2026-01-19 15-50-41" src="https://github.com/user-attachments/assets/e4abb767-afc0-46d0-be3e-c7e9e616e8a4" />
