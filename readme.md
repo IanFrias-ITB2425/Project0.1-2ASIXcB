@@ -126,21 +126,66 @@ Fichers PHP principals (publicats a `public/`):
 
 ## Canvis realitzats en el codi inicial
 
-- **Backend i BD**:
-  - Migració a PDO a [`public/db_conn.php`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/public/db_conn.php) i als scripts principals (`extagram.php`, `upload.php`, etc.).
-  - Esborrat en cascada a [`public/delete_post.php`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/public/delete_post.php) (elimina imatge, comentaris i post).
-  - Noms d’arxiu únics amb `uniqid()` a [`public/upload.php`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/public/upload.php).
-  - CRUD de comentaris amb [`public/delete_comment.php`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/public/delete_comment.php) i la lògica relacionada a [`public/interact.php`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/public/interact.php).
+### 1.1 Backend i Base de Dades
+- Migració a PDO a `public/db_conn.php` i als scripts principals (`extagram.php`, `upload.php`, etc.).
+  - Consultes preparades (protecció contra SQL Injection).
+  - Codi més net i mantenible.
+- Esborrat en cascada a `public/delete_post.php`:
+  - Elimina la imatge del sistema de fitxers, els comentaris associats i el post de BD.
+- Noms d’arxiu únics amb `uniqid()` a `public/upload.php` per evitar col·lisions i sobrescriptures.
+- CRUD de comentaris:
+  - `public/delete_comment.php` per eliminar comentaris.
+  - Lògica a `public/interact.php` per crear, llistar i eliminar comentaris.
 
-- **Interfície i UX (Tailwind)**:
-  - Disseny responsive i maquetació basada en Tailwind al frontend (HTML/PHP dels fitxers de `public/`).
-  - Ús d’icones (Heroicons) i components moderns a les vistes principals.
-  - Previsualització d’imatge en temps real i microinteraccions (hover i animacions en botons) definides a [`public/static/style.css`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/public/static/style.css).
+### 1.2 Interfície i UX (Tailwind + CSS propi)
+- Maquetació responsive amb Tailwind a les vistes de `public/`.
+- Ús d’icones (Heroicons) i components moderns a les vistes principals.
+- Millores d’UX a `public/static/style.css`:
+  - Previsualització d’imatge en temps real.
+  - Microinteraccions: efectes de hover i petites animacions en botons.
 
-- **Servidor i configuració**:
-  - Nginx amb blocs per HTTPS, certificats SSL Let’s Encrypt i rutes d’estàtics (`/static`) i pujades (`/uploads`) definits a [`files/nginx/extagram`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/files/nginx/extagram).
-  - Scripts per automatitzar la configuració d’HTTPS i posada en marxa del servei:
-    - [`files/scripts/Script-HTTPS.sh`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/files/scripts/Script-HTTPS.sh)
-    - [`files/scripts/Script_Funcional.sh`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/files/scripts/Script_Funcional.sh)
+### 1.3 Servidor i Configuració
+- Nginx amb HTTPS (Let’s Encrypt) i rutes:
+  - Estàtics: `/static`
+  - Pujades: `/uploads`
+  - Arxiu de configuració: `files/nginx/extagram`
+- Scripts d’automatització:
+  - `files/scripts/Script-HTTPS.sh` (configuració HTTPS i certificats).
+  - `files/scripts/Script_Funcional.sh` (posada en marxa, permisos, estructura de carpetes, reload, etc.).
+
+---
+
+## 2) Justificació tecnològica
+
+### 2.1 Apache2 (Servidor web)
+- Experiència i comoditat: és el servidor amb què tenim més pràctica.
+- `.htaccess`: canvis de rutes i permisos de forma intuïtiva.
+- Integració amb PHP via `mod_php` (sense haver de muntar PHP-FPM).
+- Seguretat pràctica: dominar l’eina redueix errors de configuració.
+
+### 2.2 PHP 8.3 (Motor)
+- Rendiment superior (JIT) respecte a 7.x.
+- OPcache actiu per respostes més ràpides.
+- Sintaxi moderna que facilita manteniment i seguretat del codi.
+
+### 2.3 Cloudflare (Seguretat i rendiment)
+- SSL fàcil i gratuït sense complicar el servidor.
+- Amaga la IP real de la instància, dificultant atacs directes.
+- CDN i caché per servir estàtics des del node més proper a l’usuari.
+
+### 2.4 UI-Avatars API (Identitat visual)
+- Estalvi d’espai en disc (no calen avatars genèrics al servidor).
+- Zero manteniment i bona experiència d’usuari des del primer moment.
+
+### 2.5 Tailwind CSS (Productivitat d’estil)
+- Disseny ràpid amb utilitats (`rounded-full`, `shadow-md`, `flex`, etc.).
+- Manteniment senzill (evitem un únic CSS gegant).
+- Consistència visual a tot el frontend.
+
+---
+
+## 3) DNS a Cloudflare
+
+<img width="1261" height="337" alt="Captura de pantalla de 2026-01-19 15-50-41" src="https://github.com/user-attachments/assets/6631ead1-5c19-4aaf-82a7-db34120872d4" />
 
 ---
