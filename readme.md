@@ -140,7 +140,7 @@ Fichers PHP principals (publicats a `public/`):
 ## Interfície i UX (Tailwind + CSS propi)
 - Maquetació responsive amb Tailwind a les vistes de [`public/`](../public/).
 - Ús d’icones (Heroicons) i components moderns a les vistes principals.
-- Millores d���UX a [`public/static/style.css`](../public/static/style.css):
+- Millores d’UX a [`public/static/style.css`](../public/static/style.css):
   - Previsualització d’imatge en temps real.
   - Microinteraccions: efectes de hover i petites animacions en botons.
 
