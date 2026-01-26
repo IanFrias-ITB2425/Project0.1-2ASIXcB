@@ -33,8 +33,9 @@ El script realitza les següents tasques de forma seqüencial:
 
 1.  **Descarregar el script** al servidor:
     ```bash
-    git clone [https://github.com/EL_TEU_USUARI/EL_TEU_REPO.git](https://github.com/EL_TEU_USUARI/EL_TEU_REPO.git)
-    cd EL_TEU_REPO
+    git clone [https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB.git]
+    (https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB.git)
+    cd https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB.git
     ```
 
 2.  **Donar permisos d'execució:**
@@ -49,7 +50,7 @@ El script realitza les següents tasques de forma seqüencial:
 
 4.  **Verificar el desplegament:**
     Al final de l'execució, el script mostrarà la IP pública. Obre el navegador i ves a:
-    `http://LA_TEVA_IP`
+    `http://54.161.47.236`
 
 ## Arquitectura del Sistema
 
