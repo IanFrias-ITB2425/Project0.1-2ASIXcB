@@ -1,0 +1,54 @@
+# DEFINICIÓN DEL CLUSTER (Balanceo S2 y S3)
+upstream backend_php {
+    server s2_extagram:9000;
+    server s3_extagram:9000;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name g5asixc2bc.com www.g5asixc2bc.com;
+
+    # En Docker, la raíz estándar es /var/www/html (mapeada a tu carpeta /public)
+    root /var/www/html;
+    index index.php extagram.php login.php;
+
+    # RUTAS SSL (Mapeadas en el docker-compose)
+    ssl_certificate /etc/letsencrypt/live/g5asixc2bc.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/g5asixc2bc.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    # 1. GESTIÓ DE RUTES
+    location / {
+        try_files $uri $uri/ $uri.php @static_files;
+    }
+
+    # 2. CERCA DE FITXERS ESTÀTICS (Redirigir a S6_nginx si no están en local)
+    location @static_files {
+        proxy_pass http://s6_nginx; 
+    }
+
+    # 3. BACKEND PHP (Balanceado a S2 y S3)
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_pass backend_php; 
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+    # 4. CARPETA UPLOADS (Redirigir a S5_nginx)
+    location /uploads/ {
+        proxy_pass http://s5_nginx/;
+    }
+
+    location ~ /\. {
+        deny all;
+    }
+}
+
+# REDIRECCIÓ DE HTTP A HTTPS
+server {
+    listen 80;
+    server_name g5asixc2bc.com www.g5asixc2bc.com;
+    return 301 https://$host$request_uri;
+}
