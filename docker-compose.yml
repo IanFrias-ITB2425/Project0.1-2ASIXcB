@@ -3,6 +3,8 @@ services:
   s1_nginx:
     container_name: s1_nginx
     image: nginx:alpine
+    environment:
+      - NODE_NAME=s1_nginx_balancer
     ports:
       - "80:80"
       - "443:443"
@@ -15,10 +17,12 @@ services:
       - s3_extagram
     restart: always
 
-  # S2 y S3: PHP-FPM con Driver MySQL instalado mediante Dockerfile
+  # S2 y S3: Nodos de ejecución PHP
   s2_extagram:
     container_name: s2_extagram
     build: .
+    environment:
+      - NODE_NAME=s2_extagram
     volumes:
       - ./public:/var/www/html
       - ./files/etc/php/8.3/fpm/php.ini:/usr/local/etc/php/conf.d/custom.ini
@@ -27,23 +31,29 @@ services:
   s3_extagram:
     container_name: s3_extagram
     build: .
+    environment:
+      - NODE_NAME=s3_extagram
     volumes:
       - ./public:/var/www/html
       - ./files/etc/php/8.3/fpm/php.ini:/usr/local/etc/php/conf.d/custom.ini
     restart: always
 
-  # S4: Servidor dedicado para subidas con Driver MySQL
+  # S4: Servidor dedicado para subidas
   s4_upload:
     container_name: s4_upload
     build: .
+    environment:
+      - NODE_NAME=s4_upload_engine
     volumes:
       - ./public:/var/www/html
     restart: always
 
-  # S5 y S6: Estáticos
+  # S5 y S6: Servidores de contenido estático
   s5_nginx:
     container_name: s5_nginx
     image: nginx:alpine
+    environment:
+      - NODE_NAME=s5_nginx_uploads
     volumes:
       - ./public/uploads:/usr/share/nginx/html:ro
     restart: always
@@ -51,26 +61,31 @@ services:
   s6_nginx:
     container_name: s6_nginx
     image: nginx:alpine
+    environment:
+      - NODE_NAME=s6_nginx_static
     volumes:
       - ./public/static:/usr/share/nginx/html:ro
     restart: always
 
-  # S7: MySQL
+  # S7: Base de datos MySQL
   s7_mysql:
     container_name: s7_mysql
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: extagram
+      - NODE_NAME=s7_mysql_db
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=extagram
     volumes:
       - ./files/sql/schema.sql:/docker-entrypoint-initdb.d/schema.sql
       - ./mysql_data:/var/lib/mysql
     restart: always
 
-  # S8: Redis
+  # S8: Cache Redis
   s8_redis:
     container_name: s8_redis
     image: redis:alpine
+    environment:
+      - NODE_NAME=s8_redis_cache
     restart: always
 
 networks:

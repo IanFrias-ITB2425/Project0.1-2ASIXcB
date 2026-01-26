@@ -182,7 +182,16 @@ function getAvatar($photo, $username) {
                     <?php endif; ?>
                 </div>
             </article>
-        <?php endwhile; } catch (Exception $e) { echo "<div class='text-red-500 font-bold'>Error de base de dades: " . $e->getMessage() . "</div>"; } ?>
+<?php endwhile; } catch (Exception $e) { echo "<div class='text-red-500 font-bold'>Error de base de dades: " . $e->getMessage() . "</div>"; } ?>
     </main>
+
+    <footer class="w-full max-w-[600px] mt-12 pb-8 text-center">
+        <div class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 border border-slate-200 shadow-sm">
+            <span class="flex h-2 w-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Atès per el servidor: <?php echo getenv('NODE_NAME') ?: gethostname(); ?>
+            </span>
+        </div>
+    </footer>
 </body>
 </html>
