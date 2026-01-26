@@ -49,7 +49,7 @@ El script realitza les següents tasques de forma seqüencial:
     ```
 
 4.  **Verificar el desplegament:**
-    Al final de l'execució, el script mostrarà la IP pública. Obre el navegador i ves a:
+    Al final de l'execució, el script mostrarà la IP pública. Obrim el navegador i anem a:
     `http://54.161.47.236`
 
 ## Arquitectura del Sistema
