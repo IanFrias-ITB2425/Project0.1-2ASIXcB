@@ -12,7 +12,7 @@ L'aplicació és totalment **responsive**, el que significa que pots fer-la serv
 
 ---
 
-## 📸 Funcions de la Plataforma
+## Funcions de la Plataforma
 
 ### 1. Visualització del Mur (Feed)
 A la pàgina principal (`/`), podràs veure totes les publicacions fetes pels usuaris en ordre cronològic. 
