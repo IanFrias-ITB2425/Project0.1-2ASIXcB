@@ -1,0 +1,104 @@
+services:
+  # S1: Balanceador NGINX (El cerebro que reparte el tráfico)
+  s1_nginx:
+    container_name: s1_nginx
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./files/etc/nginx/extagram:/etc/nginx/conf.d/default.conf:ro
+      - ./files/etc/letsencrypt:/etc/letsencrypt:ro
+      - ./public:/var/www/html:ro
+    environment:
+      - NODE_NAME=s1_nginx_balancer
+    depends_on:
+      - s2_extagram
+      - s3_extagram
+      - s4_upload
+    restart: always
+
+  # S2 y S3: Nodos de ejecución PHP (Carga compartida)
+  s2_extagram:
+    container_name: s2_extagram
+    build: .
+    environment:
+      - NODE_NAME=s2_extagram
+    volumes:
+      - ./public:/var/www/html
+      - ./files/etc/php/8.3/fpm/php.ini:/usr/local/etc/php/conf.d/custom.ini
+    depends_on:
+      - s8_redis
+      - s7_mysql
+    restart: always
+
+  s3_extagram:
+    container_name: s3_extagram
+    build: .
+    environment:
+      - NODE_NAME=s3_extagram
+    volumes:
+      - ./public:/var/www/html
+      - ./files/etc/php/8.3/fpm/php.ini:/usr/local/etc/php/conf.d/custom.ini
+    depends_on:
+      - s8_redis
+      - s7_mysql
+    restart: always
+
+  # S4: Servidor dedicado EXCLUSIVAMENTE para subidas (Upload Engine)
+  s4_upload:
+    container_name: s4_upload
+    build: .
+    environment:
+      - NODE_NAME=s4_upload_engine
+    volumes:
+      - ./public:/var/www/html
+      # Aquí podrías poner un php.ini con mayor límite de subida
+      - ./files/etc/php/8.3/fpm/php.ini:/usr/local/etc/php/conf.d/custom.ini
+    depends_on:
+      - s8_redis
+    restart: always
+
+  # S5 y S6: Servidores de contenido estático (Nginx puro para rapidez)
+  s5_nginx:
+    container_name: s5_nginx
+    image: nginx:alpine
+    environment:
+      - NODE_NAME=s5_nginx_uploads
+    volumes:
+      - ./public/uploads:/usr/share/nginx/html:ro
+    restart: always
+
+  s6_nginx:
+    container_name: s6_nginx
+    image: nginx:alpine
+    environment:
+      - NODE_NAME=s6_nginx_static
+    volumes:
+      - ./public/static:/usr/share/nginx/html:ro
+    restart: always
+
+  # S7: Base de datos MySQL
+  s7_mysql:
+    container_name: s7_mysql
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=extagram
+      - NODE_NAME=s7_mysql_db
+    volumes:
+      - ./files/sql/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./mysql_data:/var/lib/mysql
+    restart: always
+
+  # S8: Cache Redis (Crucial para que la sesión no se pierda entre s2, s3 y s4)
+  s8_redis:
+    container_name: s8_redis
+    image: redis:alpine
+    environment:
+      - NODE_NAME=s8_redis_cache
+    restart: always
+
+networks:
+  default:
+    name: extagram_network
