@@ -1,18 +1,29 @@
 <?php
 include 'db_conn.php';
 
+// Verificamos que el usuario esté logueado para interactuar
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $post_id = $_POST['post_id'];
+    $user_id = $_SESSION['user_id']; // Capturamos el ID real de la sesión
 
+    // GESTIÓN DE LIKES
     if (isset($_POST['like'])) {
-        $db->prepare("UPDATE posts SET likes_count = likes_count + 1 WHERE id = ?")->execute([$post_id]);
+        $stmt = $db->prepare("UPDATE posts SET likes_count = likes_count + 1 WHERE id = ?");
+        $stmt->execute([$post_id]);
     }
 
-    // Aquí verificamos que el texto no esté vacío antes de insertar
+    // GESTIÓN DE COMENTARIOS CON USUARIO REAL
     if (isset($_POST['comment_text']) && !empty(trim($_POST['comment_text']))) {
         $comment = trim($_POST['comment_text']);
-        $stmt = $db->prepare("INSERT INTO comments (post_id, comment) VALUES (?, ?)");
-        $stmt->execute([$post_id, $comment]);
+        
+        // Insertamos incluyendo el user_id para que no sea Anónimo
+        $stmt = $db->prepare("INSERT INTO comments (post_id, user_id, comment) VALUES (?, ?, ?)");
+        $stmt->execute([$post_id, $user_id, $comment]);
     }
 }
 

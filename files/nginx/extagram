@@ -1,56 +1,102 @@
+# ==========================================================
+# CONFIGURACIÓ OPTIMITZADA EXTAGRAM (LB + STICKY SESSIONS)
+# ==========================================================
+
+# 1. Backend General (S2 i S3)
+upstream php_backend {
+    ip_hash;            # <--- VITAL: Manté l'usuari al mateix servidor (evita tancar sessió)
+    server s2_extagram:9000;
+    server s3_extagram:9000;
+    keepalive 32;       # Manté connexions obertes per velocitat
+}
+
+# 2. Node de Pujades (S4) - Dedicat a processar imatges grans
+upstream upload_node {
+    server s4_upload:9000;
+    keepalive 8;
+}
+
 server {
-    listen 443 ssl;
-    listen [::]:443 ssl;
+    listen 443 ssl http2; # Afegit http2 per rendiment
+    listen [::]:443 ssl http2;
     server_name g5asixc2bc.com www.g5asixc2bc.com;
 
-    # Arrel del projecte (on hi ha els fitxers PHP)
-    root /var/www/extagram/public;
-    index index.php extagram.php;
+    root /var/www/html;
+    index extagram.php index.php;
 
-    # CONFIGURACIÓ SSL OFICIAL (Let's Encrypt)
+    # SSL Config
     ssl_certificate /etc/letsencrypt/live/g5asixc2bc.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/g5asixc2bc.com/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
     ssl_ciphers HIGH:!aNULL:!MD5;
 
-    # 1. GESTIÓ DE RUTES (Substitueix la redirecció 301 trencada)
+    # Logs
+    access_log /var/log/nginx/extagram_access.log;
+    error_log /var/log/nginx/extagram_error.log warn;
+
+    # Optimització de buffers (Evita errors 502/504 en respostes grans)
+    fastcgi_buffers 16 16k;
+    fastcgi_buffer_size 32k;
+
+    # 1. GESTIÓ DE RUTES BÀSIQUES
     location / {
-        # Aquesta línia permet que si algú posa "interact", Nginx busqui "interact.php" 
-        # internament SENSE fer una redirecció que trenqui el mètode POST.
-        try_files $uri $uri/ $uri.php @static_files;
+        try_files $uri $uri/ /extagram.php?$query_string;
     }
 
-    # 2. CERCA DE FITXERS ESTÀTICS (.svg, .css, .js)
-    location @static_files {
-        root /var/www/extagram/static;
-        try_files $uri $uri.svg $uri.css $uri.js /extagram.php?$query_string;
-    }
-
-    # 3. BACKEND PHP (Processament de script)
-    location ~ \.php$ {
-        include snippets/fastcgi-php.conf;
-        # Comprova que la versió de PHP sigui la 8.3 realment activa
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        
-        # Paràmetres per evitar talls en càrregues grans
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        include fastcgi_params;
-    }
-
-    # 4. CARPETA UPLOADS (Imatges reals)
-    location /uploads/ {
-        alias /var/www/extagram/uploads/;
+    # 2. ARXIUS ESTÀTICS (CSS, JS, SVG) - No passen per PHP
+    location ~* \.(css|js|svg|jpg|jpeg|png|gif|ico|woff|woff2)$ {
         expires 30d;
         add_header Cache-Control "public, no-transform";
+        access_log off;
     }
 
-    # 5. SEGURETAT (Opcional: No permetre veure fitxers ocults com .db o .git)
-    location ~ /\. {
+    # 3. REGLA CRÍTICA: Desviar SUBIDAS al S4
+    location = /upload.php {
+        include fastcgi_params;
+        fastcgi_pass upload_node; 
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        
+        # Configuració específica per uploads grans
+        client_max_body_size 50M;
+        fastcgi_read_timeout 600;  # 10 minuts per processar imatges
+        fastcgi_send_timeout 600;
+        fastcgi_connect_timeout 60;
+    }
+
+    # 4. BACKEND PHP GENERAL (S2 i S3)
+    location ~ \.php$ {
+        try_files $uri =404;
+        include fastcgi_params;
+        fastcgi_pass php_backend;
+        
+        fastcgi_index extagram.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        
+        # Timeouts normals per navegació fluida
+        fastcgi_read_timeout 60;
+        fastcgi_keep_conn on;
+    }
+
+    # 5. CARPETA UPLOADS (Servir imatges pujades)
+    location /uploads/ {
+        alias /var/www/html/uploads/;
+        try_files $uri $uri/ =404; # Evita executar PHP aquí per seguretat
+        expires 30d;
+        add_header Cache-Control "public";
+    }
+
+    # Seguretat: Bloquejar arxius sensibles
+    location ~ /\.(ht|git|db|env) {
         deny all;
     }
+
+    # Pàgina d'error personalitzada
+    error_page 404 /error.php;
 }
 
-# REDIRECCIÓ DE HTTP A HTTPS
+# REDIRECCIÓ HTTP -> HTTPS
 server {
     listen 80;
     server_name g5asixc2bc.com www.g5asixc2bc.com;

@@ -1,14 +1,27 @@
 <?php
-// 1. Iniciem la sessió per poder tancar-la
-session_start();
+// 1. Incluimos la conexión para que cargue la configuración de Redis
+include 'db_conn.php';
 
-// 2. Eliminem totes les variables de sessió (user_id, username, etc.)
+// 2. Si por algún motivo session_start no se ejecutó en db_conn, lo forzamos
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 3. Limpiamos las variables del array $_SESSION
 $_SESSION = array();
 
-// 3. Destruïm la sessió al servidor
+// 4. IMPORTANTE: Borramos la cookie de sesión del navegador
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]
+    );
+}
+
+// 5. Destruimos la sesión en el servidor (Redis eliminará la clave)
 session_destroy();
 
-// 4. Redirigim l'usuari a la pàgina principal o al login
-header("Location: extagram.php");
+// 6. Redirigimos al login
+header("Location: login.php");
 exit();
-?>

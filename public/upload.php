@@ -1,5 +1,4 @@
 <?php
-session_start();
 include 'db_conn.php';
 
 // Protecció: si no hi ha sessió, no deixem pujar res

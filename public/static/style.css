@@ -6,40 +6,42 @@
     --indigo-700: #4338ca;
     --slate-50: #f8fafc;
     --slate-200: #e2e8f0;
+    --slate-400: #94a3b8;
+    --blue-instagram: #0095f6;
 }
 
 body {
     margin: 0;
     font-family: 'Inter', sans-serif;
-    background-color: var(--slate-50); /* bg-slate-50 */
+    background-color: var(--slate-50); 
     color: #1e293b;
 }
 
-/* 2. Suport per a classes Tailwind (Estructures) */
+/* 2. Suport per a classes Tailwind */
 .max-w-md { width: 100%; max-width: 448px; margin: 0 auto; }
 .bg-white { background-color: #ffffff; }
 .rounded-2xl { border-radius: 1rem; }
-.rounded-3xl { border-radius: 1.5rem; }
 .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
 .border { border: 1px solid var(--slate-200); }
 .p-6 { padding: 1.5rem; }
-.p-5 { padding: 1.25rem; }
-.mb-12 { margin-bottom: 3rem; }
 .space-y-4 > * + * { margin-top: 1rem; }
-.space-y-10 > * + * { margin-top: 2.5rem; }
 
-/* 3. Inputs i Botons (Selectors d'atribut per estalviar classes) */
-input[type="text"], input[type="file"] {
+/* 3. Inputs i Botons (MODIFICAT PER NO AFECTAR ICONES) */
+
+/* Estil per als inputs de formulari (Pujar post, Login) */
+.input-main {
     width: 100%;
     padding: 0.75rem 1rem;
     border-radius: 0.75rem;
     border: 1px solid var(--slate-200);
     background-color: #f1f5f9;
+    box-sizing: border-box;
 }
 
-button[type="submit"] {
-    background-color: var(--indigo-600);
-    color: white;
+/* NOMÉS per als botons grans de l'app (Publicar Post, Login) */
+.btn-primary {
+    background-color: var(--indigo-600) !important;
+    color: white !important;
     font-weight: 700;
     padding: 0.75rem;
     border-radius: 0.75rem;
@@ -49,28 +51,61 @@ button[type="submit"] {
     transition: background 0.2s;
 }
 
-button[type="submit"]:hover {
-    background-color: var(--indigo-700);
+.btn-primary:hover {
+    background-color: var(--indigo-700) !important;
+}
+
+/* NETEJA TOTAL per a botons d'icones i text de comentari */
+button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+}
+
+/* Estil del botó "Publicar" petit del comentari */
+.btn-publish-text {
+    color: var(--blue-instagram);
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    background: transparent !important;
+}
+
+.btn-publish-text:hover {
+    color: #1a73e8;
 }
 
 /* 4. Estils del Post */
-article {
-    overflow: hidden;
-    position: relative;
-}
-
+article { overflow: hidden; position: relative; }
 .flex { display: flex; }
 .items-center { align-items: center; }
 .justify-between { justify-content: space-between; }
-.space-x-3 > * + * { margin-left: 0.75rem; }
 
-img { max-width: 100%; height: auto; }
+/* 5. Especial: L'àrea de Like */
+/* Treure els fons blaus de les teves captures */
+.btn-icon-clear {
+    background-color: transparent !important;
+    color: #1e293b !important;
+    padding: 0 !important;
+    width: auto !important;
+    transition: transform 0.1s ease;
+}
 
-/* 5. Especial: L'àrea de Like i Comentaris */
-.bg-indigo-50 { background-color: #eef2ff; color: var(--indigo-600); }
-.text-indigo-600 { color: var(--indigo-600); }
-.font-bold { font-weight: 700; }
+.btn-icon-clear:hover {
+    transform: scale(1.1);
+}
 
-/* 6. Scrollbar Personalitzat (Ja el tenies al PHP, però aquí assegures el fallback) */
+.btn-icon-clear svg {
+    display: block;
+}
+
+/* 6. Scrollbar */
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }

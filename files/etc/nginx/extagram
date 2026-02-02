@@ -1,54 +1,120 @@
-# DEFINICIÓN DEL CLUSTER (Balanceo S2 y S3)
+# ==========================================================
+# CONFIGURACIÓ FINAL EXTAGRAM - STABLE VERSION (.php)
+# ==========================================================
+
+# 1. DEFINICIÓ DE CLUSTERS (Upstreams)
+# ----------------------------------------------------------
+# Balanç de càrrega per a la navegació general (S2 i S3)
 upstream backend_php {
     server s2_extagram:9000;
     server s3_extagram:9000;
 }
 
+# Node reservat exclusivament per a pujades de fitxers (S4)
+upstream upload_node {
+    server s4_upload:9000;
+}
+
+# 2. SERVIDOR HTTPS (PORT 443)
+# ----------------------------------------------------------
 server {
-    listen 443 ssl;
-    listen [::]:443 ssl;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
     server_name g5asixc2bc.com www.g5asixc2bc.com;
 
-    # En Docker, la raíz estándar es /var/www/html (mapeada a tu carpeta /public)
+    # Arrel i fitxers d'índex
     root /var/www/html;
-    index index.php extagram.php login.php;
+    index extagram.php login.php index.php;
 
-    # RUTAS SSL (Mapeadas en el docker-compose)
+    # Certificats SSL (Mapejats des de l'host a S1)
     ssl_certificate /etc/letsencrypt/live/g5asixc2bc.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/g5asixc2bc.com/privkey.pem;
+    
+    # Paràmetres SSL segurs
     ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
     ssl_ciphers HIGH:!aNULL:!MD5;
 
-    # 1. GESTIÓ DE RUTES
+    # Seguretat i Límits
+    server_tokens off;
+    client_max_body_size 25M; # Permet pujades fins a 25MB
+
+    # 3. GESTIÓ DE RUTES GENERALS
+    # ----------------------------------------------------------
     location / {
-        try_files $uri $uri/ $uri.php @static_files;
+        # Si el fitxer no existeix, ens porta a extagram.php per defecte
+        try_files $uri $uri/ /extagram.php$is_args$args;
     }
 
-    # 2. CERCA DE FITXERS ESTÀTICS (Redirigir a S6_nginx si no están en local)
-    location @static_files {
-        proxy_pass http://s6_nginx; 
-    }
-
-    # 3. BACKEND PHP (Balanceado a S2 y S3)
-    location ~ \.php$ {
+    # 4. REGLA ESPECÍFICA PER AL NUDE DE PUJADES (S4)
+    # ----------------------------------------------------------
+    # Forcem que upload.php SEMPRE sigui processat pel contenidor S4
+    location = /upload.php {
         include fastcgi_params;
-        fastcgi_pass backend_php; 
+        fastcgi_pass upload_node;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-	add_header X-Backend-Server $upstream_addr;	
-	proxy_set_header X-Real-IP $remote_addr;
+        
+        # Temps d'espera més llarg per a fitxers grans
+        fastcgi_read_timeout 300;
+        
+        # Seguretat
+        fastcgi_hide_header X-Powered-By;
     }
 
-    # 4. CARPETA UPLOADS (Redirigir a S5_nginx)
+    # 5. PROCESSAMENT PHP GENERAL (S2 i S3)
+    # ----------------------------------------------------------
+    location ~ \.php$ {
+        # Seguretat: si el fitxer no existeix, 404 instantani (evita descàrregues)
+        try_files $uri =404;
+        
+        include fastcgi_params;
+        fastcgi_pass backend_php;
+        fastcgi_index extagram.php;
+        
+        # Paràmetres FastCGI
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        
+        # Cabeceres per saber quin node ens respon (Depuració)
+        add_header X-Backend-Server $upstream_addr;
+        fastcgi_hide_header X-Powered-By;
+    }
+
+    # 6. SERVITORS D'ESTÀTICS (S5 i S6 via Proxy)
+    # ----------------------------------------------------------
+    
+    # Imatges pujades pels usuaris (S5)
     location /uploads/ {
         proxy_pass http://s5_nginx/;
+        proxy_set_header Host $host;
+        expires 30d;
     }
 
+    # Altres fitxers estàtics: CSS, JS, Logos (S6)
+    location /static/ {
+        proxy_pass http://s6_nginx/;
+        proxy_set_header Host $host;
+        expires 7d;
+    }
+
+    # 7. GESTIÓ D'ERRORS
+    # ----------------------------------------------------------
+    error_page 404 /error.php;
+    location = /error.php {
+        include fastcgi_params;
+        fastcgi_pass backend_php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        internal;
+    }
+
+    # Bloqueig de seguretat per a fitxers ocults (.env, .git, etc.)
     location ~ /\. {
         deny all;
     }
 }
 
-# REDIRECCIÓ DE HTTP A HTTPS
+# 3. SERVIDOR HTTP (Redirecció a HTTPS)
+# ----------------------------------------------------------
 server {
     listen 80;
     server_name g5asixc2bc.com www.g5asixc2bc.com;

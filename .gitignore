@@ -1,0 +1,14 @@
+# Ignorar dades de la base de dades
+mysql_data/
+dbdata/
+
+# Ignorar imatges pujades per usuaris (mantenim la carpeta però no el contingut)
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Fitxers de configuració sensible
+public/google_config.php
+
+# Altres
+.DS_Store
+*.log

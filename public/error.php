@@ -1,9 +1,9 @@
 <?php
-$code = $_GET['code'] ?? 'Error';
+// Detectem el codi d'error real enviat per Nginx
+$code = $_SERVER['REDIRECT_STATUS'] ?? $_GET['code'] ?? '404';
 $message = "S'ha produït un error inesperat.";
 $description = "Sembla que alguna cosa ha sortit malament als nostres servidors.";
 
-// Personalització segons el codi d'error
 switch ($code) {
     case '404':
         $message = "Pàgina no trobada";
@@ -11,11 +11,11 @@ switch ($code) {
         break;
     case '403':
         $message = "Accés prohibit";
-        $description = "No tens permisos per entrar en aquesta zona del servidor.";
+        $description = "No tens permisos per entrar en aquesta zona.";
         break;
     case '500':
-        $message = "Error intern del servidor";
-        $description = "Tenim un problema tècnic. El nostre equip (o l'Apache) està treballant-hi.";
+        $message = "Error intern";
+        $description = "Tenim un problema tècnic als nodes de processament.";
         break;
 }
 ?>
@@ -26,33 +26,31 @@ switch ($code) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $code; ?> - Extagram</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" type="image/svg+xml" href="/preview.svg">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-[#fafafa] min-h-screen flex flex-col items-center justify-center p-4 text-slate-900">
 
     <div class="max-w-md w-full text-center space-y-6">
-        <div class="flex justify-center">
-            <div class="bg-red-50 p-6 rounded-full">
-                <img src="/preview.svg" alt="Error" class="w-16 h-16 opacity-50">
+        <div class="flex justify-center mb-4">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <i data-lucide="frown" class="w-16 h-16 text-slate-300"></i>
             </div>
         </div>
 
-        <h1 class="text-6xl font-black text-slate-200"><?php echo htmlspecialchars($code); ?></h1>
-        <h2 class="text-2xl font-bold text-slate-800"><?php echo htmlspecialchars($message); ?></h2>
-        <p class="text-slate-500 text-sm leading-relaxed">
+        <h1 class="text-8xl font-black text-slate-100"><?php echo htmlspecialchars($code); ?></h1>
+        <h2 class="text-2xl font-bold text-slate-800 tracking-tight"><?php echo htmlspecialchars($message); ?></h2>
+        <p class="text-slate-500 text-sm leading-relaxed max-w-[280px] mx-auto">
             <?php echo htmlspecialchars($description); ?>
         </p>
 
         <div class="pt-6">
             <a href="extagram.php" 
-               class="bg-[#0096f7] hover:bg-[#0081d6] text-white font-bold py-3 px-8 rounded-lg transition-all inline-block shadow-md active:scale-95">
+               class="bg-[#0095f6] hover:bg-[#1877f2] text-white font-bold py-2.5 px-8 rounded-xl transition-all inline-block shadow-sm active:scale-95 text-sm">
                 Tornar a l'inici
             </a>
         </div>
-
-        <footer class="pt-12 text-[10px] text-slate-400 uppercase tracking-widest font-bold">
-        </footer>
     </div>
 
+    <script>lucide.createIcons();</script>
 </body>
 </html>
