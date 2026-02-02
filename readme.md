@@ -1,5 +1,9 @@
 # Planificació Inicial P0.1 ASIXcB G5
 
+## Manuals
+- Manual d’administració: https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/manual_admin.md
+- Manual d’usuari: https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/manual_usuari.md
+
 ## Enllaços
 - Tasques (ProofHub): https://itecbcn.proofhub.com/bapplite/#app/todos/project-9429814374/list-270271277074
 - Web: https://g5asixc2bc.com/
@@ -96,7 +100,7 @@ Documentació del procés d’HTTPS / Let’s Encrypt i integració amb Nginx:
 
 ## PHP / Backend
 
-Fichers PHP principals (publicats a `public/`):
+Fitxers PHP principals (publicats a `public/`):
 
 - Connexió a la base de dades (PDO):  
   - [`public/db_conn.php`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/public/db_conn.php)
@@ -198,7 +202,7 @@ Fichers PHP principals (publicats a `public/`):
 - PHP OPcache: https://www.php.net/opcache
 - Nginx docs: https://nginx.org/en/docs/
 
-> Punts d’entrada del projecte: [`public/`](/public/) · Config de servidor: [`files/nginx/`](/files/nginx/) · Scripts: [`files/scripts/`](/files/scripts/)
+> Manuals: [`manual_admin.md`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/manual_admin.md) · [`manual_usuari.md`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/manual_usuari.md) · Punts d’entrada del projecte: [`public/`](/public/) · Config de servidor: [`files/nginx/`](/files/nginx/) · Scripts: [`files/scripts/`](/files/scripts/)
 
 # DNS a Cloudflare
 
