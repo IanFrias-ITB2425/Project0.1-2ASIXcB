@@ -107,5 +107,5 @@ Bones pràctiques:
 - Logs habituals (host o contenidors): Nginx, PHP-FPM, MySQL, Redis.
 - Seguretat: capçaleres de Nginx, OPcache actiu, secrets fora del codi (variables d’entorn), WAF/Rate limiting a Cloudflare.
 
-Desplegament clàssic (no Docker) i posada en marxa:
+Desplegament clàssic sense Docker i posada en marxa:
 - Guia funcional: https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/Documentaci%C3%B3-Funcional.md
