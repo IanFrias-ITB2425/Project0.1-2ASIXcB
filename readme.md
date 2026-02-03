@@ -22,19 +22,15 @@
 13. [Enllaços Útils](#enllaços-útils-apis-i-docs)
 14. [Configuració DNS](#dns-a-cloudflare)
 ---
+
 ## Panell de Control i Documentació
 > **Manual d’Administració: https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/manual_admin.md**
 > **Manual d’Usuari: https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/manual_usuari.md**
 
-## Enllaços Rapids
-
+## Enllaços Ràpids
 > **Web: https://g5asixc2bc.com/**
 > **Tasques (ProofHub): https://itecbcn.proofhub.com/bapplite/#app/todos/project-9429814374/list-270271277074**
-
 ---
-
----
-
 ## Arquitectura del Sistema
 
 <div align="center">
