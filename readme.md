@@ -1,43 +1,48 @@
-# Planificació Inicial P0.1 ASIXcB G5
+# Extagram - Projecte 0.1 ASIXcB G5
 
-## Manuals
-- Manual d’administració: https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/manual_admin.md
-- Manual d’usuari: https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/manual_usuari.md
-
-## Enllaços
-- Tasques (ProofHub): https://itecbcn.proofhub.com/bapplite/#app/todos/project-9429814374/list-270271277074
-- Web: https://g5asixc2bc.com/
+![Status](https://img.shields.io/badge/Status-Active-success?style=flat-square)
+![PHP](https://img.shields.io/badge/PHP-8.3-blue?style=flat-square)
+![NGINX](https://img.shields.io/badge/NGINX-Proxy-green?style=flat-square)
+![AWS](https://img.shields.io/badge/AWS-EC2-orange?style=flat-square)
 
 ---
 
-## Arquitectura Inicial
-<img align="right" width="320" alt="Captura Arquitectura" src="https://github.com/user-attachments/assets/e1185035-66a8-4d61-a5f0-bc0377b435d9" />
+## Panell de Control i Documentació
 
-- S1: NGINX (proxy invers i balanceig) cap a S2/S3/S4/S5/S6.
-- S2 i S3: PHP-FPM executant `extragram.php` (part dinàmica).
-- S4: PHP-FPM amb `upload.php` (pujada d’imatges a `uploads/` i registre a BD).
-- S5: NGINX servint imatges des d’`uploads/` (estàtic).
-- S6: NGINX servint CSS/JS/SVG (estàtic).
-- S7: MySQL (taula `posts`), dades persistents a `dbdata/`.
-
-Directoris/volums:
-- `uploads/` (imatges pujades)
-- `dbdata/` (dades MySQL)
-
-<br clear="right" />
+| Manuals | Enllaços Rapids |
+| :--- | :--- |
+| [**Manual d’Administració**](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/manual_admin.md) | [**Web: g5asixc2bc.com**](https://g5asixc2bc.com/) |
+| [**Manual d’Usuari**](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/manual_usuari.md) | [**Tasques (ProofHub)**](https://itecbcn.proofhub.com/bapplite/#app/todos/project-9429814374/list-270271277074) |
 
 ---
 
-## Infraestructura (Sprint 1)
-- AWS EC2 t3.medium (2 vCPU, 4 GB RAM), Ubuntu.
-- Arrencada ràpida en una instància; arquitectura preparada per separar rols.
+## Arquitectura del Sistema
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/e1185035-66a8-4d61-a5f0-bc0377b435d9" alt="Arquitectura Extagram" width="600" />
+</div>
+
+### Components i Serveis
+El sistema utilitza NGINX com a proxy invers que balanceja i distribueix la càrrega:
+
+- **S1 (Proxy):** NGINX gestionant el tràfic cap a la resta de serveis.
+- **S2 & S3 (App):** PHP-FPM executant `extragram.php` (lògica principal).
+- **S4 (Upload):** PHP-FPM dedicat a `upload.php` (pujada d'imatges + registre DB).
+- **S5 (Media):** NGINX servint contingut estàtic d'`uploads/`.
+- **S6 (Assets):** NGINX servint CSS/JS/SVG.
+- **S7 (Dades):** MySQL (Persistència a `dbdata/`).
 
 ---
 
-## Accés al servidor
+## Infraestructura i Accés (Sprint 1)
+
+**Especificacions:** AWS EC2 `t3.medium` (2 vCPU, 4 GB RAM) sobre Ubuntu.
+
+### Accés SSH
 ```bash
-ssh -i Baixades/Grupo5.pem ubuntu@54.161.47.236
+# Permisos i connexió
 chmod 400 Baixades/Grupo5.pem
+ssh -i Baixades/Grupo5.pem ubuntu@54.161.47.236
 ```
 
 ---
