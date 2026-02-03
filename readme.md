@@ -6,13 +6,32 @@
 ![AWS](https://img.shields.io/badge/AWS-EC2-orange?style=flat-square)
 
 ---
-
+## Índex de Continguts
+1. [Panell de Control i Documentació](#panell-de-control-i-documentació)
+2. [Enllaços Ràpids](#enllaços-ràpids)
+3. [Arquitectura del Sistema](#arquitectura-del-sistema)
+4. [Infraestructura i Accés](#infraestructura-i-accés-sprint-1)
+5. [Base de Dades](#base-de-dades-en-ús)
+6. [Rutes del Servei](#rutes-del-servei)
+7. [NGINX](#nginx)
+8. [Certificats i Let's Encrypt](#certificats-i-lets-encrypt)
+9. [PHP / Backend](#php--backend)
+10. [Frontend / Estils i Estàtics](#frontend--estils-i-estàtics)
+11. [Canvis Realitzats en el Codi Inicial](#canvis-realitzats-en-el-codi-inicial)
+12. [Justificació Tecnològica](#justificació-tecnològica)
+13. [Enllaços Útils](#enllaços-útils-apis-i-docs)
+14. [Configuració DNS](#dns-a-cloudflare)
+---
 ## Panell de Control i Documentació
+> **Manual d’Administració: https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/manual_admin.md**
+> **Manual d’Usuari: https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/manual_usuari.md**
 
-| Manuals | Enllaços Rapids |
-| :--- | :--- |
-| [**Manual d’Administració**](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/manual_admin.md) | [**Web: g5asixc2bc.com**](https://g5asixc2bc.com/) |
-| [**Manual d’Usuari**](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/manual_usuari.md) | [**Tasques (ProofHub)**](https://itecbcn.proofhub.com/bapplite/#app/todos/project-9429814374/list-270271277074) |
+## Enllaços Rapids
+
+> **Web: https://g5asixc2bc.com/**
+> **Tasques (ProofHub): https://itecbcn.proofhub.com/bapplite/#app/todos/project-9429814374/list-270271277074**
+
+---
 
 ---
 
