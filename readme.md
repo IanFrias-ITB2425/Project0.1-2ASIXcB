@@ -34,7 +34,7 @@
 ## Arquitectura del Sistema
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/e1185035-66a8-4d61-a5f0-bc0377b435d9](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/public/uploads/esquema.png" alt="Arquitectura Extagram" width="600" />
+  <img src="https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/public/uploads/esquema.png" alt="Arquitectura Extagram" width="600" />
 </div>
 
 ### Components i Serveis
