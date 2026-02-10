@@ -1,39 +1,63 @@
-# Planificació Inicial P0.1 ASIXcB G5
+# Extagram - Projecte 0.1 ASIXcB G5
 
-## Enllaços
-- Tasques (ProofHub): https://itecbcn.proofhub.com/bapplite/#app/todos/project-9429814374/list-270271277074
-- Web: https://g5asixc2bc.com/
+![Status](https://img.shields.io/badge/Status-Active-success?style=flat-square)
+![PHP](https://img.shields.io/badge/PHP-8.3-blue?style=flat-square)
+![NGINX](https://img.shields.io/badge/NGINX-Proxy-green?style=flat-square)
+![AWS](https://img.shields.io/badge/AWS-EC2-orange?style=flat-square)
+
+---
+## Índex de Continguts
+1. [Panell de Control i Documentació](#panell-de-control-i-documentació)
+2. [Enllaços Ràpids](#enllaços-ràpids)
+3. [Arquitectura del Sistema](#arquitectura-del-sistema)
+4. [Infraestructura i Accés](#infraestructura-i-accés-sprint-1)
+5. [Base de Dades](#base-de-dades-en-ús)
+6. [Rutes del Servei](#rutes-del-servei)
+7. [NGINX](#nginx)
+8. [Certificats i Let's Encrypt](#certificats-i-lets-encrypt)
+9. [PHP / Backend](#php--backend)
+10. [Frontend / Estils i Estàtics](#frontend--estils-i-estàtics)
+11. [Canvis Realitzats en el Codi Inicial](#canvis-realitzats-en-el-codi-inicial)
+12. [Justificació Tecnològica](#justificació-tecnològica)
+13. [Enllaços Útils](#enllaços-útils-apis-i-docs)
+14. [Configuració DNS](#dns-a-cloudflare)
+---
+
+## Panell de Control i Documentació
+> **Manual d’Administració: https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/manual_admin.md**
+> **Manual d’Usuari: https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/manual_usuari.md**
+
+## Enllaços Ràpids
+> **Web: https://g5asixc2bc.com/**
+> **Tasques (ProofHub): https://itecbcn.proofhub.com/bapplite/#app/todos/project-9429814374/list-270271277074**
+---
+## Arquitectura del Sistema
+
+<div align="center">
+  <img src="https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/public/uploads/esquema.png" alt="Arquitectura Extagram" width="600" />
+</div>
+
+### Components i Serveis
+El sistema utilitza NGINX com a proxy invers que balanceja i distribueix la càrrega:
+
+- **S1 (Proxy):** NGINX gestionant el tràfic cap a la resta de serveis.
+- **S2 & S3 (App):** PHP-FPM executant `extragram.php` (lògica principal).
+- **S4 (Upload):** PHP-FPM dedicat a `upload.php` (pujada d'imatges + registre DB).
+- **S5 (Media):** NGINX servint contingut estàtic d'`uploads/`.
+- **S6 (Assets):** NGINX servint CSS/JS/SVG.
+- **S7 (Dades):** MySQL (Persistència a `dbdata/`).
 
 ---
 
-## Arquitectura Inicial
-<img align="right" width="320" alt="Captura Arquitectura" src="https://github.com/user-attachments/assets/e1185035-66a8-4d61-a5f0-bc0377b435d9" />
+## Infraestructura i Accés (Sprint 1)
 
-- S1: NGINX (proxy invers i balanceig) cap a S2/S3/S4/S5/S6.
-- S2 i S3: PHP-FPM executant `extragram.php` (part dinàmica).
-- S4: PHP-FPM amb `upload.php` (pujada d’imatges a `uploads/` i registre a BD).
-- S5: NGINX servint imatges des d’`uploads/` (estàtic).
-- S6: NGINX servint CSS/JS/SVG (estàtic).
-- S7: MySQL (taula `posts`), dades persistents a `dbdata/`.
+**Especificacions:** AWS EC2 `t3.medium` (2 vCPU, 4 GB RAM) sobre Ubuntu.
 
-Directoris/volums:
-- `uploads/` (imatges pujades)
-- `dbdata/` (dades MySQL)
-
-<br clear="right" />
-
----
-
-## Infraestructura (Sprint 1)
-- AWS EC2 t3.medium (2 vCPU, 4 GB RAM), Ubuntu.
-- Arrencada ràpida en una instància; arquitectura preparada per separar rols.
-
----
-
-## Accés al servidor
+### Accés SSH
 ```bash
-ssh -i Baixades/Grupo5.pem ubuntu@54.161.47.236
+# Permisos i connexió
 chmod 400 Baixades/Grupo5.pem
+ssh -i Baixades/Grupo5.pem ubuntu@54.161.47.236
 ```
 
 ---
@@ -96,7 +120,7 @@ Documentació del procés d’HTTPS / Let’s Encrypt i integració amb Nginx:
 
 ## PHP / Backend
 
-Fichers PHP principals (publicats a `public/`):
+Fitxers PHP principals (publicats a `public/`):
 
 - Connexió a la base de dades (PDO):  
   - [`public/db_conn.php`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/public/db_conn.php)
@@ -198,7 +222,7 @@ Fichers PHP principals (publicats a `public/`):
 - PHP OPcache: https://www.php.net/opcache
 - Nginx docs: https://nginx.org/en/docs/
 
-> Punts d’entrada del projecte: [`public/`](/public/) · Config de servidor: [`files/nginx/`](/files/nginx/) · Scripts: [`files/scripts/`](/files/scripts/)
+> Manuals: [`manual_admin.md`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/manual_admin.md) · [`manual_usuari.md`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/main/Documentaci%C3%B3/manual_usuari.md) · Punts d’entrada del projecte: [`public/`](/public/) · Config de servidor: [`files/nginx/`](/files/nginx/) · Scripts: [`files/scripts/`](/files/scripts/)
 
 # DNS a Cloudflare
 
