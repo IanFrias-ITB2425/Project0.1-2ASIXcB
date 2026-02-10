@@ -3,30 +3,20 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 include 'db_conn.php';
 
-// Iniciar sesión si no está activa
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-/**
- * Funció optimitzada per obtenir l'avatar
- * Prioritza URLs externes (Google) i verifica fitxers locals
- */
 function getAvatar($photo, $username) {
-    // 1. Si és una URL (com les de Google), la retornem directament
     if (!empty($photo) && (str_starts_with($photo, 'http://') || str_starts_with($photo, 'https://'))) {
         return $photo;
     }
-
-    // 2. Si no és URL, busquem a la carpeta local d'uploads
     if (!empty($photo)) {
         $path = "uploads/" . $photo;
         if (file_exists(__DIR__ . "/" . $path)) {
             return $path;
         }
     }
-
-    // 3. Fallback: Avatar genèric amb inicials
     return "https://ui-avatars.com/api/?name=" . urlencode($username) . "&background=random&color=fff&bold=true";
 }
 
@@ -37,13 +27,10 @@ $nodo = getenv('NODE_NAME') ?: gethostname();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Extagram</title>
+    <title>Extagram - Feed</title>
     <link rel="icon" type="image/svg+xml" href="/preview.svg">
-    
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="static/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
-    
     <script>
         function previewImage(event) {
             const reader = new FileReader();
@@ -71,24 +58,37 @@ $nodo = getenv('NODE_NAME') ?: gethostname();
     </script>
     <style>
         .instagram-card { max-width: 600px; width: 100%; }
-        .btn-icon {
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #1e293b;
-            transition: all 0.2s;
-        }
+        .btn-icon { background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #1e293b; transition: all 0.2s; }
         .btn-icon:hover { transform: scale(1.1); color: #3b82f6; }
         .ping { animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; }
         @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+        
+        /* Animació per al Dashboard Flotant */
+        .glow-pulse {
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
     </style>
 </head>
 <body class="bg-[#fafafa] min-h-screen flex flex-col items-center py-8 px-4 text-slate-900">
 
-    <header class="instagram-card flex justify-between items-center mb-8">
+    <?php if (isset($_SESSION['user_id'])): ?>
+    <div class="fixed bottom-6 right-6 z-[9999] flex flex-col items-end">
+        <a href="dashboard.php" class="flex items-center gap-3 bg-blue-600 text-white p-4 rounded-full shadow-2xl hover:bg-blue-700 transition-all hover:scale-110 active:scale-95 glow-pulse group">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+            <span class="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out font-bold uppercase text-[10px] tracking-widest whitespace-nowrap">
+                Seguretat
+            </span>
+        </a>
+    </div>
+    <?php endif; ?>
+
+    <header class="instagram-card flex flex-col sm:flex-row justify-between items-center mb-8 gap-4 px-2">
         <div class="flex items-center space-x-3">
             <div class="bg-white p-2 rounded-xl shadow-sm border border-slate-100">
                 <img src="/preview.svg" alt="Logo" class="w-6 h-6">
@@ -98,26 +98,27 @@ $nodo = getenv('NODE_NAME') ?: gethostname();
             </h1>
         </div>
         
-        <nav class="text-sm">
+        <nav>
             <?php if (isset($_SESSION['user_id'])): ?>
                 <div class="flex items-center space-x-4">
                     <a href="profile.php" class="flex items-center space-x-2 bg-white pr-3 rounded-full border border-slate-200 shadow-sm hover:bg-slate-50 transition">
                         <img src="<?= getAvatar($_SESSION['avatar_url'] ?? '', $_SESSION['username']); ?>" class="w-8 h-8 rounded-full object-cover">
-                        <span class="font-bold text-slate-700">@<?= htmlspecialchars($_SESSION['username']); ?></span>
+                        <span class="hidden xs:inline font-bold text-slate-700 text-sm">@<?= htmlspecialchars($_SESSION['username']); ?></span>
                     </a>
-                    <a href="logout.php" class="text-slate-400 hover:text-red-500 transition-colors">
+                    
+                    <a href="logout.php" class="p-2 text-slate-400 hover:text-red-500 transition-colors">
                         <i data-lucide="log-out" class="w-5 h-5"></i>
                     </a>
                 </div>
             <?php else: ?>
-                <a href="login.php" class="bg-[#0096f7] text-white px-5 py-2 rounded-full font-bold shadow-md hover:bg-blue-600 transition">Entrar</a>
+                <a href="login.php" class="bg-[#0096f7] text-white px-6 py-2 rounded-full font-bold shadow-md hover:bg-blue-600 transition">Entrar</a>
             <?php endif; ?>
         </nav>
     </header>
 
     <?php if (isset($_SESSION['user_id'])): ?>
     <section class="instagram-card bg-white border border-slate-200 rounded-2xl shadow-sm mb-10 overflow-hidden">
-        <form method="POST" enctype="multipart/form-data" action="upload.php" class="flex flex-col items-center gap-4 p-8">
+        <form method="POST" enctype="multipart/form-data" action="upload.php" class="flex flex-col items-center gap-4 p-6 sm:p-8">
             <input type="text" name="post" placeholder="Què vols compartir, <?= htmlspecialchars($_SESSION['username']); ?>?" required 
                    class="w-full max-w-[400px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-sm text-black focus:bg-white focus:border-blue-300 transition-all">
             
@@ -151,7 +152,6 @@ $nodo = getenv('NODE_NAME') ?: gethostname();
                 $autor_nom = $fila['username'] ?? "Anònim";
         ?>
             <article class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden group">
-                
                 <div class="p-4 flex items-center justify-between border-b border-slate-50">
                     <div class="flex items-center space-x-3">
                         <img src="<?= getAvatar($fila['avatar_url'], $autor_nom); ?>" 
@@ -253,5 +253,9 @@ $nodo = getenv('NODE_NAME') ?: gethostname();
             </span>
         </div>
     </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>

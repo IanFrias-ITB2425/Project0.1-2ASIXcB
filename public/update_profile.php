@@ -1,23 +1,16 @@
-
 <?php
 /**
- * SISTEMA DE GESTIÓ DE PERFIL - EXTAGRAM (CORREGIDO)
+ * UPDATE_PROFILE.PHP - VERSIÓN FINAL CON GESTIÓN DE SESIONES
  */
 
-// AFEGIT: Iniciar sessió abans de res
-session_start(); 
+// Usamos el nuevo gestor que arregla lo de Chrome
+require_once 'auth_session.php'; 
 
+// Configuración de errores
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-require_once 'db_conn.php';
-
-// Verificació de seguretat
-if (!isset($_SESSION['user_id'])) {
-    // Debug: si falla, sabrem si és per falta de ID
-    header("Location: login.php?error=no_session_id_" . session_id());
-    exit();
-}
+// Ya no hace falta require 'db_conn.php' ni session_start() porque auth_session lo hace.
 
 $user_id = $_SESSION['user_id'];
 $action  = $_POST['action'] ?? '';
@@ -27,65 +20,58 @@ function redirectWith($msg, $type = 'success') {
     exit();
 }
 
-// --- ACCIÓ: ACTUALITZAR AVATAR ---
-if ($action === 'update_avatar') {
-    if (!isset($_FILES['new_avatar']) || $_FILES['new_avatar']['error'] === UPLOAD_ERR_NO_FILE) {
-        redirectWith("No has seleccionat cap fitxer.", "error");
-    }
-
-    $file = $_FILES['new_avatar'];
-    $upload_dir = __DIR__ . "/uploads/";
-
-    // Validacions de tipus
-    $allowed_exts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    
-    if (!in_array($extension, $allowed_exts)) {
-        redirectWith("Format no permès.", "error");
-    }
-
-    // Nom únic per evitar cache del navegador
-    $new_filename = "avatar_" . $user_id . "_" . time() . "." . $extension;
-    $final_path = $upload_dir . $new_filename;
-
-    if (move_uploaded_file($file['tmp_name'], $final_path)) {
-        // Esborrar antic i fer UPDATE
-        $stmt = $db->prepare("SELECT avatar_url FROM users WHERE id = ?");
-        $stmt->execute([$user_id]);
-        $old_avatar = $stmt->fetchColumn();
-
-        if ($old_avatar && !filter_var($old_avatar, FILTER_VALIDATE_URL) && $old_avatar !== 'default_avatar.png') {
-            @unlink($upload_dir . $old_avatar);
+try {
+    // =================================================================
+    // 1. ACTUALIZAR AVATAR
+    // =================================================================
+    if ($action === 'update_avatar') {
+        if (!isset($_FILES['new_avatar']) || $_FILES['new_avatar']['error'] === UPLOAD_ERR_NO_FILE) {
+            redirectWith("No has seleccionado imagen.", "error");
         }
 
-        $db->prepare("UPDATE users SET avatar_url = ? WHERE id = ?")->execute([$new_filename, $user_id]);
+        $file = $_FILES['new_avatar'];
+        $upload_dir = '/var/www/html/uploads/'; 
         
-        // ACTUALITZAR SESSIÓ PERQUÈ ES VEGI AL MOMENT
-        $_SESSION['avatar_url'] = $new_filename; 
+        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+        if (!in_array($ext, $allowed)) {
+            redirectWith("Formato no válido.", "error");
+        }
+
+        $new_filename = "avatar_" . $user_id . "_" . time() . "." . $ext;
         
-        redirectWith("Foto de perfil actualitzada!");
+        if (move_uploaded_file($file['tmp_name'], $upload_dir . $new_filename)) {
+            // Limpieza antigua
+            $stmt = $db->prepare("SELECT avatar_url FROM users WHERE id = ?");
+            $stmt->execute([$user_id]);
+            $old = $stmt->fetchColumn();
+
+            if ($old && !filter_var($old, FILTER_VALIDATE_URL) && $old !== 'default_avatar.png') {
+                @unlink($upload_dir . $old);
+            }
+
+            $db->prepare("UPDATE users SET avatar_url = ? WHERE id = ?")->execute([$new_filename, $user_id]);
+            $_SESSION['avatar_url'] = $new_filename;
+            redirectWith("Foto actualizada.");
+        }
     }
-}
 
-// --- ACCIÓ: ACTUALITZAR INFORMACIÓ (Nom i Pass) ---
-if ($action === 'update_info') {
-    $new_username = trim($_POST['username'] ?? '');
-    $new_password = $_POST['new_password'] ?? '';
+    // =================================================================
+    // 2. ACTUALIZAR INFO (Usuario/Pass)
+    // =================================================================
+    if ($action === 'update_info') {
+        $new_username = trim($_POST['username'] ?? '');
+        $new_pass     = $_POST['new_password'] ?? '';
 
-    if (empty($new_username)) {
-        redirectWith("El nom d'usuari no pot estar buit.", "error");
-    }
+        if (empty($new_username)) redirectWith("Nombre obligatorio.", "error");
 
-    try {
-        // Comprovar duplicats
-        $check = $db->prepare("SELECT id FROM users WHERE username = ? AND id <> ?");
+        $check = $db->prepare("SELECT id FROM users WHERE username = ? AND id != ?");
         $check->execute([$new_username, $user_id]);
-        if ($check->fetch()) {
-            redirectWith("Aquest nom d'usuari ja està agafat.", "error");
-        }
+        if ($check->fetch()) redirectWith("Nombre ocupado.", "error");
 
-        if (!empty($new_password)) {
-            $hashed = password_hash($new_password, PASSWORD_DEFAULT);
+        if (!empty($new_pass)) {
+            $hashed = password_hash($new_pass, PASSWORD_DEFAULT);
             $sql = "UPDATE users SET username = ?, password = ? WHERE id = ?";
             $params = [$new_username, $hashed, $user_id];
         } else {
@@ -93,23 +79,48 @@ if ($action === 'update_info') {
             $params = [$new_username, $user_id];
         }
 
-        $stmt = $db->prepare($sql);
-        $res = $stmt->execute($params);
-
-        if ($res) {
-            // CRUCIAL: Actualitzar la sessió amb el nou nom
-            $_SESSION['username'] = $new_username;
-            redirectWith("Dades actualitzades a la BD i sessió.");
-        } else {
-            redirectWith("Error en l'execució de la consulta.", "error");
-        }
-
-    } catch (PDOException $e) {
-        redirectWith("Error DB: " . $e->getMessage(), "error");
+        $db->prepare($sql)->execute($params);
+        $_SESSION['username'] = $new_username;
+        redirectWith("Datos actualizados.");
     }
+
+    // =================================================================
+    // 3. GESTIÓN DE SESIONES (NUEVO)
+    // =================================================================
+    
+    // ECHAR A UN DISPOSITIVO ESPECÍFICO
+    if ($action === 'kill_session') {
+        $target_session = $_POST['session_id_to_kill'] ?? '';
+        
+        // Solo borramos si pertenece a este usuario
+        $stmt = $db->prepare("DELETE FROM active_sessions WHERE session_id = ? AND user_id = ?");
+        $stmt->execute([$target_session, $user_id]);
+        
+        redirectWith("Dispositivo desconectado.");
+    }
+
+    // CERRAR TODAS LAS SESIONES MENOS ESTA
+    if ($action === 'logout_all') {
+        $current = session_id();
+        $stmt = $db->prepare("DELETE FROM active_sessions WHERE user_id = ? AND session_id != ?");
+        $stmt->execute([$user_id, $current]);
+        
+        redirectWith("Has cerrado sesión en todos los otros dispositivos.");
+    }
+
+    // =================================================================
+    // 4. ELIMINAR CUENTA
+    // =================================================================
+    if ($action === 'delete_account') {
+        $db->prepare("DELETE FROM users WHERE id = ?")->execute([$user_id]);
+        session_destroy();
+        header("Location: login.php?msg=Cuenta eliminada");
+        exit();
+    }
+
+} catch (Exception $e) {
+    redirectWith("Error: " . $e->getMessage(), "error");
 }
 
-// Les altres accions (delete_data, delete_account) estan bé estructuralment.
 header("Location: profile.php");
-exit();
 ?>

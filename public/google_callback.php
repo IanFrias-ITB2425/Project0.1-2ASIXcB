@@ -1,9 +1,12 @@
 <?php
 // /docker/public/google_callback.php
-include 'db_conn.php';
+
+// Al incluir db_conn.php, la sesión se inicia AUTOMÁTICAMENTE.
+require_once 'db_conn.php';
 require_once 'google_config.php';
 
 if (isset($_GET['code'])) {
+    // 1. Intercambiar el código por un Token de Acceso
     $ch = curl_init('https://oauth2.googleapis.com/token');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
@@ -15,52 +18,65 @@ if (isset($_GET['code'])) {
         'grant_type'    => 'authorization_code'
     ]));
     
-    $data = json_decode(curl_exec($ch), true);
+    $response = curl_exec($ch);
+    $data = json_decode($response, true);
     curl_close($ch);
 
     if (isset($data['access_token'])) {
+        // 2. Obtener información del usuario con el Token
         $ch = curl_init('https://www.googleapis.com/oauth2/v3/userinfo');
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $data['access_token']]);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $user_info = json_decode(curl_exec($ch), true);
+        $userInfoResponse = curl_exec($ch);
+        $user_info = json_decode($userInfoResponse, true);
         curl_close($ch);
 
         if (isset($user_info['sub'])) {
+            // Datos recibidos de Google
             $gid   = $user_info['sub'];
             $email = $user_info['email'];
             $name  = $user_info['name'];
-            $pic   = $user_info['picture']; // Foto actual de Google
+            $pic   = $user_info['picture'];
 
-            // 1. Buscamos si el usuario ya existe
+            // 3. Lógica de Base de Datos (Login o Registro)
+            // Verificamos si el usuario existe por ID de Google o Email
             $stmt = $db->prepare("SELECT id FROM users WHERE google_id = ? OR email = ?");
             $stmt->execute([$gid, $email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($user) {
-                // 2. ACTUALIZACIÓN: Si ya existe, actualizamos su foto y nombre de Google
+                // USUARIO EXISTE: Actualizamos datos (foto y nombre)
                 $stmt = $db->prepare("UPDATE users SET username = ?, avatar_url = ?, google_id = ? WHERE id = ?");
                 $stmt->execute([$name, $pic, $gid, $user['id']]);
                 $userId = $user['id'];
             } else {
-                // 3. REGISTRO: Si no existe, lo creamos
+                // USUARIO NUEVO: Lo creamos
                 $stmt = $db->prepare("INSERT INTO users (username, email, google_id, avatar_url) VALUES (?, ?, ?, ?)");
                 $stmt->execute([$name, $email, $gid, $pic]);
                 $userId = $db->lastInsertId();
             }
 
-            // Volvemos a leer los datos finales para asegurar consistencia
+            // Recuperamos los datos finales del usuario para la sesión
             $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
             $stmt->execute([$userId]);
             $finalUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            session_start();
+            // 4. GUARDAR SESIÓN (¡Sin hacer session_start de nuevo!)
             $_SESSION['user_id']    = $finalUser['id'];
             $_SESSION['username']   = $finalUser['username'];
-            $_SESSION['avatar_url'] = $finalUser['avatar_url']; // Coincide con extagram.php
-            
+            $_SESSION['avatar_url'] = $finalUser['avatar_url'];
+
+            // 5. ¡CRÍTICO! Forzar escritura en Redis antes de redirigir
+            // Esto evita que la redirección ocurra antes de guardar los datos
+            session_write_close();
+
             header("Location: extagram.php");
             exit();
         }
     }
 }
-header("Location: login.php?error=auth");
+
+// Si algo falla, volver al login con error
+header("Location: login.php?error=auth_failed");
+exit();
+?>
