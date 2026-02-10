@@ -1,5 +1,20 @@
+version: '3.8'
+
+# --- DEFINICIÓN DE CONFIGURACIÓN COMÚN (Para no repetir código) ---
+x-php-base: &php_base
+  build: .
+  user: "root:root" # Necesario según tu configuración actual
+  restart: always
+  volumes:
+    - ./public:/var/www/html
+    - ./public/uploads:/var/www/html/uploads
+    - ./files/etc/php/8.3/fpm/php.ini:/usr/local/etc/php/conf.d/custom.ini
+  depends_on:
+    - s8_redis
+    - s7_mysql
+
 services:
-  # S1: Balanceador NGINX (El cerebro que reparte el tráfico)
+  # S1: Balanceador de Carga NGINX
   s1_nginx:
     container_name: s1_nginx
     image: nginx:alpine
@@ -9,96 +24,137 @@ services:
     volumes:
       - ./files/etc/nginx/extagram:/etc/nginx/conf.d/default.conf:ro
       - ./files/etc/letsencrypt:/etc/letsencrypt:ro
-      - ./public:/var/www/html:ro
+      - ./files/nginx/.htpasswd:/etc/nginx/.htpasswd:ro
+      # Montamos todo public para que pueda servir fallbacks si es necesario
+      - ./public:/var/www/html:ro 
     environment:
       - NODE_NAME=s1_nginx_balancer
     depends_on:
       - s2_extagram
       - s3_extagram
       - s4_upload
+      - grafana
+    networks:
+      - extagram_net
     restart: always
 
-  # S2 y S3: Nodos de ejecución PHP (Carga compartida)
+  # S2: Nodo PHP 1 (Hereda de &php_base)
   s2_extagram:
+    <<: *php_base
     container_name: s2_extagram
-    build: .
+    privileged: true # Necesario para el Dashboard/Docker control
     environment:
       - NODE_NAME=s2_extagram
     volumes:
       - ./public:/var/www/html
       - ./files/etc/php/8.3/fpm/php.ini:/usr/local/etc/php/conf.d/custom.ini
-    depends_on:
-      - s8_redis
-      - s7_mysql
-    restart: always
+      # Monitorización Docker
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+      - /var/log/auth.log:/var/log/auth.log:ro
+      - /proc:/host/proc:ro
+      - /:/host/root:ro
+    networks:
+      - extagram_net
 
+  # S3: Nodo PHP 2 (Hereda de &php_base)
   s3_extagram:
+    <<: *php_base
     container_name: s3_extagram
-    build: .
+    privileged: true
     environment:
       - NODE_NAME=s3_extagram
     volumes:
       - ./public:/var/www/html
       - ./files/etc/php/8.3/fpm/php.ini:/usr/local/etc/php/conf.d/custom.ini
-    depends_on:
-      - s8_redis
-      - s7_mysql
-    restart: always
+      # Monitorización Docker
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+      - /var/log/auth.log:/var/log/auth.log:ro
+      - /proc:/host/proc:ro
+      - /:/host/root:ro
+    networks:
+      - extagram_net
 
-  # S4: Servidor dedicado EXCLUSIVAMENTE para subidas (Upload Engine)
+  # S4: Servidor Dedicado Uploads (Hereda de &php_base)
   s4_upload:
+    <<: *php_base
     container_name: s4_upload
-    build: .
     environment:
       - NODE_NAME=s4_upload_engine
-    volumes:
-      - ./public:/var/www/html
-      # Aquí podrías poner un php.ini con mayor límite de subida
-      - ./files/etc/php/8.3/fpm/php.ini:/usr/local/etc/php/conf.d/custom.ini
-    depends_on:
-      - s8_redis
-    restart: always
+    # No necesita acceso a Docker sock, es más seguro así
+    networks:
+      - extagram_net
 
-  # S5 y S6: Servidores de contenido estático (Nginx puro para rapidez)
+  # S5: Servidor Estático de Imágenes (CORREGIDO)
   s5_nginx:
     container_name: s5_nginx
     image: nginx:alpine
-    environment:
-      - NODE_NAME=s5_nginx_uploads
     volumes:
-      - ./public/uploads:/usr/share/nginx/html:ro
+      # TRUCO: Mapeamos dentro de /uploads para que la ruta URL coincida con la ruta física
+      - ./public/uploads:/usr/share/nginx/html/uploads:ro
+    networks:
+      - extagram_net
     restart: always
 
+  # S6: Servidor Estático Assets
   s6_nginx:
     container_name: s6_nginx
     image: nginx:alpine
-    environment:
-      - NODE_NAME=s6_nginx_static
     volumes:
-      - ./public/static:/usr/share/nginx/html:ro
+      - ./public/static:/usr/share/nginx/html/static:ro
+    networks:
+      - extagram_net
     restart: always
 
-  # S7: Base de datos MySQL
+  # S7: Base de Datos MySQL
+# S7: Base de Datos MySQL
   s7_mysql:
     container_name: s7_mysql
     image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
     environment:
       - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=extagram
-      - NODE_NAME=s7_mysql_db
+      - MYSQL_DATABASE=extagram_db     # <--- CAMBIADO para coincidir con tu PHP
+      - MYSQL_USER=extagram_admin      # <--- AGREGADO
+      - MYSQL_PASSWORD=pass123         # <--- AGREGADO
     volumes:
       - ./files/sql/schema.sql:/docker-entrypoint-initdb.d/schema.sql
-      - ./mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
+    networks:
+      - extagram_net
     restart: always
 
-  # S8: Cache Redis (Crucial para que la sesión no se pierda entre s2, s3 y s4)
+
+
+  # S8: Redis Cache
   s8_redis:
     container_name: s8_redis
     image: redis:alpine
-    environment:
-      - NODE_NAME=s8_redis_cache
+    networks:
+      - extagram_net
     restart: always
 
+  # S9: Grafana Monitorización
+  grafana:
+    container_name: s9_grafana
+    image: grafana/grafana:latest
+    environment:
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:%(http_port)s/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    volumes:
+      - grafana_storage:/var/lib/grafana
+    networks:
+      - extagram_net
+    restart: always
+
+volumes:
+  grafana_storage:
+  mysql_data:
+
 networks:
-  default:
-    name: extagram_network
+  extagram_net:
+    driver: bridge

@@ -1,102 +1,77 @@
-# ==========================================================
-# CONFIGURACIÓ OPTIMITZADA EXTAGRAM (LB + STICKY SESSIONS)
-# ==========================================================
-
-# 1. Backend General (S2 i S3)
+# Upstream con persistencia de sesión por IP
 upstream php_backend {
-    ip_hash;            # <--- VITAL: Manté l'usuari al mateix servidor (evita tancar sessió)
+    ip_hash; 
     server s2_extagram:9000;
     server s3_extagram:9000;
-    keepalive 32;       # Manté connexions obertes per velocitat
-}
-
-# 2. Node de Pujades (S4) - Dedicat a processar imatges grans
-upstream upload_node {
-    server s4_upload:9000;
-    keepalive 8;
 }
 
 server {
-    listen 443 ssl http2; # Afegit http2 per rendiment
-    listen [::]:443 ssl http2;
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
     server_name g5asixc2bc.com www.g5asixc2bc.com;
 
     root /var/www/html;
     index extagram.php index.php;
 
-    # SSL Config
+    # SSL - Asegúrate de que las rutas son correctas
     ssl_certificate /etc/letsencrypt/live/g5asixc2bc.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/g5asixc2bc.com/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_prefer_server_ciphers on;
-    ssl_ciphers HIGH:!aNULL:!MD5;
 
-    # Logs
-    access_log /var/log/nginx/extagram_access.log;
-    error_log /var/log/nginx/extagram_error.log warn;
+    # FIX 1: Buffers masivos para Tokens de Google (Evita 502/504)
+    fastcgi_buffers 16 256k;
+    fastcgi_buffer_size 512k;
+    fastcgi_busy_buffers_size 512k;
 
-    # Optimització de buffers (Evita errors 502/504 en respostes grans)
-    fastcgi_buffers 16 16k;
-    fastcgi_buffer_size 32k;
+    # FIX 2: Seguridad para dashboard.php
+    location = /dashboard.php {
+        auth_basic "Acceso Restringido";
+        auth_basic_user_file /etc/nginx/.htpasswd;
 
-    # 1. GESTIÓ DE RUTES BÀSIQUES
-    location / {
-        try_files $uri $uri/ /extagram.php?$query_string;
-    }
-
-    # 2. ARXIUS ESTÀTICS (CSS, JS, SVG) - No passen per PHP
-    location ~* \.(css|js|svg|jpg|jpeg|png|gif|ico|woff|woff2)$ {
-        expires 30d;
-        add_header Cache-Control "public, no-transform";
-        access_log off;
-    }
-
-    # 3. REGLA CRÍTICA: Desviar SUBIDAS al S4
-    location = /upload.php {
         include fastcgi_params;
-        fastcgi_pass upload_node; 
+        fastcgi_pass php_backend;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         
-        # Configuració específica per uploads grans
-        client_max_body_size 50M;
-        fastcgi_read_timeout 600;  # 10 minuts per processar imatges
-        fastcgi_send_timeout 600;
-        fastcgi_connect_timeout 60;
+        # Parámetros críticos para sesión en Chrome
+        fastcgi_param HTTPS on;
+        fastcgi_param HTTP_AUTHORIZATION $http_authorization;
+        fastcgi_param REQUEST_SCHEME https;
     }
 
-    # 4. BACKEND PHP GENERAL (S2 i S3)
+    # FIX 3: Manejo de login y callbacks de Google
+    location ~ /(profile|google-callback|login)\.php$ {
+        include fastcgi_params;
+        fastcgi_pass php_backend;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param HTTPS on;
+        
+        # Evitar que el navegador cachee una sesión fallida
+        add_header Cache-Control "no-store, no-cache, must-revalidate, max-age=0";
+    }
+
+    # Configuración PHP general
     location ~ \.php$ {
         try_files $uri =404;
         include fastcgi_params;
         fastcgi_pass php_backend;
-        
-        fastcgi_index extagram.php;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param PATH_INFO $fastcgi_path_info;
-        
-        # Timeouts normals per navegació fluida
-        fastcgi_read_timeout 60;
-        fastcgi_keep_conn on;
+        fastcgi_param HTTPS on;
     }
 
-    # 5. CARPETA UPLOADS (Servir imatges pujades)
-    location /uploads/ {
-        alias /var/www/html/uploads/;
-        try_files $uri $uri/ =404; # Evita executar PHP aquí per seguretat
-        expires 30d;
-        add_header Cache-Control "public";
+    # Proxy para Grafana
+    location /grafana/ {
+        proxy_pass http://grafana:3000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto https;
     }
 
-    # Seguretat: Bloquejar arxius sensibles
-    location ~ /\.(ht|git|db|env) {
-        deny all;
+    location / {
+        try_files $uri $uri/ /extagram.php?$query_string;
     }
-
-    # Pàgina d'error personalitzada
-    error_page 404 /error.php;
 }
 
-# REDIRECCIÓ HTTP -> HTTPS
+# Redirección forzada a HTTPS
 server {
     listen 80;
     server_name g5asixc2bc.com www.g5asixc2bc.com;
