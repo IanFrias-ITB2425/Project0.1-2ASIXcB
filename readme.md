@@ -257,6 +257,10 @@ Per gestionar els atacs de força bruta, hem desplegat **Fail2Ban**, que monitor
 * **Protecció SSH:** Si es detecten 3 intents fallits, la IP atacant es bloqueja durant **1 hora**.
 * **Filtre de Bots:** Bloqueig de **24 hores** per a IPs que escanegen rutes vulnerables de NGINX.
 * **Recidiva:** Les IPs reincidents són banejades automàticament durant **1 setmana**.
+- [`files/fail2ban/discord.conf`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/e252a6bec66f9add45ec8c0e9e0c904477f0df9e/files/fail2ban/discord.conf)
+- [`files/fail2ban/fail2ban-discord.sh`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/e252a6bec66f9add45ec8c0e9e0c904477f0df9e/files/fail2ban/fail2ban-discord.sh)
+- [`files/fail2ban/jail.local`](https://github.com/IanFrias-ITB2425/Project0.1-2ASIXcB/blob/e252a6bec66f9add45ec8c0e9e0c904477f0df9e/files/fail2ban/jail.local)
+
 
 <img width="1845" height="471" alt="Captura de pantalla de 2026-02-23 16-11-19" src="https://github.com/user-attachments/assets/9738cd02-7261-48f4-abc7-8283153386be" />
 
