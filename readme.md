@@ -21,6 +21,7 @@
 12. [Justificació Tecnològica](#justificació-tecnològica)
 13. [Enllaços Útils](#enllaços-útils-apis-i-docs)
 14. [Configuració DNS](#dns-a-cloudflare)
+15. [Seguretat i Protecció (Sprint 4)](#seguretat-i-protecció-sprint-4)
 ---
 
 ## Panell de Control i Documentació
@@ -234,7 +235,7 @@ Aquí tens el bloc llest per enganxar al final de la teva documentació de l'**E
 
 ---
 
-## 🔒 Seguretat i Protecció (Sprint 4)
+## Seguretat i Protecció (Sprint 4)
 
 Com a tancament de la infraestructura, hem implementat una capa de seguretat activa per protegir la instància de producció contra accessos no autoritzats i abusos.
 
