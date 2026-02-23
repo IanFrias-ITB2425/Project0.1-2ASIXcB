@@ -269,7 +269,7 @@ Per gestionar els atacs de força bruta, hem desplegat **Fail2Ban**, que monitor
 ### Integració amb Discord
 
 Hem desenvolupat un sistema de notificacions automàtiques. Cada vegada que el sistema detecta i bloqueja una amenaça, l'equip rep una alerta en temps real al canal de **Discord** detallant la IP i el servei atacat.
-
+[Enllaç al discord](https://discord.gg/CMnPuZzM)
 <img width="592" height="391" alt="Captura de pantalla de 2026-02-23 16-08-58" src="https://github.com/user-attachments/assets/7e8dfb47-6e05-4b3e-af29-08b103d0eba6" />
 
 ### Gestió Segura de Secrets
