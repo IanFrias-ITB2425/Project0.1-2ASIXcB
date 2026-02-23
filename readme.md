@@ -227,3 +227,52 @@ Fitxers PHP principals (publicats a `public/`):
 # DNS a Cloudflare
 
 <img width="1261" height="337" alt="Captura de pantalla de 2026-01-19 15-50-41" src="https://github.com/user-attachments/assets/e4abb767-afc0-46d0-be3e-c7e9e616e8a4" />
+
+Entès, té tot el sentit del món. Com que la seguretat és un dels pilars que heu tancat a l'**Sprint 4**, l'ideal és col·locar-ho al final de tot per tancar el document amb la capa de protecció que envolta tot el projecte.
+
+Aquí tens el bloc llest per enganxar al final de la teva documentació de l'**Extagram - Projecte 0.1 ASIXcB G5**:
+
+---
+
+## 🔒 Seguretat i Protecció (Sprint 4)
+
+Com a tancament de la infraestructura, hem implementat una capa de seguretat activa per protegir la instància de producció contra accessos no autoritzats i abusos.
+
+### Firewall (UFW)
+
+Hem configurat el **Uncomplicated Firewall** seguint una política de "Deny by Default". Només permetem el tràfic necessari per al funcionament de l'aplicació i la gestió de l'equip.
+
+* **Política Entrant:** Denegada per defecte.
+* **Ports Oberts:**
+* `22/TCP` (SSH) per a administració.
+* `80/TCP` i `443/TCP` per al servei web d'Extagram.
+* `3000/TCP`, `3306/TCP` i `9000/TCP` per a la comunicació entre serveis (Frontend, DB i Backend).
+
+<img width="592" height="344" alt="Captura de pantalla de 2026-02-23 16-08-33" src="https://github.com/user-attachments/assets/864a6380-a9a8-4ea3-9c58-866a6d3f84dd" />
+
+### Prevenció d'Intrusions (Fail2Ban)
+
+Per gestionar els atacs de força bruta, hem desplegat **Fail2Ban**, que monitoritza els logs i actua dinàmicament:
+
+* **Protecció SSH:** Si es detecten 3 intents fallits, la IP atacant es bloqueja durant **1 hora**.
+* **Filtre de Bots:** Bloqueig de **24 hores** per a IPs que escanegen rutes vulnerables de NGINX.
+* **Recidiva:** Les IPs reincidents són banejades automàticament durant **1 setmana**.
+
+<img width="1845" height="471" alt="Captura de pantalla de 2026-02-23 16-11-19" src="https://github.com/user-attachments/assets/9738cd02-7261-48f4-abc7-8283153386be" />
+
+
+### Integració amb Discord
+
+Hem desenvolupat un sistema de notificacions automàtiques. Cada vegada que el sistema detecta i bloqueja una amenaça, l'equip rep una alerta en temps real al canal de **Discord** detallant la IP i el servei atacat.
+
+<img width="592" height="391" alt="Captura de pantalla de 2026-02-23 16-08-58" src="https://github.com/user-attachments/assets/7e8dfb47-6e05-4b3e-af29-08b103d0eba6" />
+
+### Gestió Segura de Secrets
+
+Per garantir la higiene del repositori i la seguretat de l'equip:
+
+* **Aïllament:** La URL del Webhook de Discord i altres claus sensibles es guarden en fitxers ocults (`.discord_secret`) amb permisos restrictius (`600`).
+* **Git Hygiene:** Hem actualitzat el `.gitignore` per evitar que dades sensibles o logs del sistema es publiquin al GitHub del projecte.
+* **Plantilles:** S'han inclòs fitxers `.example` per facilitar el desplegament en nous entorns sense exposar dades reals.
+
+---
