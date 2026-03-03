@@ -246,10 +246,10 @@ Hem configurat el **Uncomplicated Firewall** seguint una política de "Deny by D
 * **Política Entrant:** Denegada per defecte.
 * **Ports Oberts:**
 * `22/TCP` (SSH) per a administració.
-* `80/TCP` i `443/TCP` per al servei web d'Extagram.
-* `3000/TCP`, `3306/TCP` i `9000/TCP` per a la comunicació entre serveis (Frontend, DB i Backend).
+* `80/TCP` i `443/TCP` per accedir al servei web d'Extagram.
 
-<img width="592" height="344" alt="Captura de pantalla de 2026-02-23 16-08-33" src="https://github.com/user-attachments/assets/864a6380-a9a8-4ea3-9c58-866a6d3f84dd" />
+<img width="480" height="236" alt="Captura de pantalla de 2026-03-03 16-20-23" src="https://github.com/user-attachments/assets/d25c2faf-40b7-44ec-9782-55fa37aa9737" />
+
 
 ### Prevenció d'Intrusions (Fail2Ban)
 
@@ -279,5 +279,83 @@ Per garantir la higiene del repositori i la seguretat de l'equip:
 * **Aïllament:** La URL del Webhook de Discord i altres claus sensibles es guarden en fitxers ocults (`.discord_secret`) amb permisos restrictius (`600`).
 * **Git Hygiene:** Hem actualitzat el `.gitignore` per evitar que dades sensibles o logs del sistema es publiquin al GitHub del projecte.
 * **Plantilles:** S'han inclòs fitxers `.example` per facilitar el desplegament en nous entorns sense exposar dades reals.
+
+Perquè el Hardening de **Nginx (s1_nginx)** sigui avaluable, hem de documentar com hem transformat un servidor web estàndard en una "fortalesa" que actua com a primera línia de defensa (Reverse Proxy) i aïlla completament els nodes de backend.
+
+Aquí tens l'explicació detallada de les capes aplicades a Nginx per sumar al teu Markdown:
+
+---
+
+### Hardening de Servidor Web (Nginx Reverse Proxy)
+
+El node **s1_nginx** no és només un servidor de contingut; s'ha configurat com un **Gateway de Seguretat** que filtra tot el tràfic abans que arribi a l'aplicació.
+
+#### 1. Ocultació de l'Empremta (Server Tokens)
+
+S'ha desactivat la directiva `server_tokens`. Per defecte, Nginx revela la seva versió exacta en els missatges d'error (ex: `nginx/1.29.4`). Això facilita que un atacant busqui vulnerabilitats (CVEs) específiques d'aquella versió.
+
+* **Mesura:** `server_tokens off;`
+* **Resultat:** L'encapçalament HTTP només mostra `Server: nginx`, dificultant el reconeixement de l'entorn.
+
+#### 2. Protecció de Microserveis (Aïllament de l'Host)
+
+Nginx actua com a **Reverse Proxy**. Això significa que els nodes de l'aplicació (`s2`, `s3`, `s4`) i la base de dades (`s7`) **no tenen ports oberts a Internet**.
+
+* **Mecanisme:** Tot el tràfic extern mor al contenidor `s1`. Nginx el redirigeix internament a través de la xarxa bridge de Docker (`extagram_net`).
+* **Hardening:** Si un atacant intenta connectar-se directament al port 9000 (PHP) o 3306 (MySQL) des de fora, es trobarà el port tancat pel Firewall.
+
+#### 3. Encapçalaments de Seguretat (Security Headers)
+
+Hem injectat directives al fitxer `default.conf` per protegir els usuaris del navegador:
+
+* **X-Frame-Options:** Evita atacs de **Clickjacking**, impedint que la web es carregui dins d'un `<iframe>` d'un altre domini.
+* **X-Content-Type-Options:** Força el navegador a respectar el tipus de contingut enviat (MIME sniffing), evitant l'execució de scripts maliciosos camuflats com a imatges.
+* **Content-Security-Policy (CSP):** (Opcional) Limita d'on es poden carregar recursos (scripts, fonts, imatges), mitigant atacs de **XSS**.
+
+#### 4. Restricció d'Accés per Directori (Basic Auth)
+
+L'accés a zones crítiques (com els logs o el dashboard d'administració) s'ha protegit amb una capa addicional d'autenticació a nivell de servidor:
+
+* **Mètode:** `.htpasswd`.
+* **Implementació:** El fitxer de contrasenyes es munta com a **només lectura (`:ro`)** al contenidor, protegint les credencials d'administrador d'una possible escriptura no autoritzada.
+
+#### 5. Gestió Segura de Certificats (SSL/TLS)
+
+S'ha configurat Nginx per gestionar el xifrat d'extrem a extrem:
+
+* **Muntatge segur:** El directori de Let's Encrypt es munta des de l'host a `/etc/letsencrypt:ro`.
+* **Hardening:** El contenidor de Nginx pot llegir el certificat per xifrar la comunicació, però no té permisos per modificar-lo o esborrar-lo, garantint la continuïtat del servei.
+
+---
+
+### Proves de Verificació per al Markdown (Nginx)
+
+> **Prova 1: Verificació de l'ocultació de versió (Server Tokens)**
+> ```bash
+> curl -I http://localhost
+> # Resultat esperat: El camp "Server" només ha de dir "nginx", sense números.
+> 
+> ```
+> 
+> 
+
+> **Prova 2: Verificació de fitxers de configuració (Read-Only)**
+> ```bash
+> # Intentar modificar la config des de dins del contenidor
+> docker exec -it s1_nginx sh -c "echo 'hack' >> /etc/nginx/conf.d/default.conf"
+> # Resultat esperat: "Read-only file system"
+> 
+> ```
+> 
+> 
+
+> **Prova 3: Verificació d'encapçalaments de seguretat**
+> ```bash
+> curl -I http://localhost | grep -E "X-Frame-Options|X-Content-Type-Options"
+> # Resultat esperat: Han d'aparèixer les línies configurades.
+> 
+> ```
+> 
+> 
 
 ---
