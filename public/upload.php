@@ -1,3 +1,5 @@
+# Autor: ASIXcB G5 - Alberto Trujillo, Rehan Farooq, Aleix Tomas, Ian Frias Reyes
+# ------------------------------------------------------------------------------
 <?php
 // VITAL: Sense session_start() no podem saber qui és l'usuari (S2, S3 i S4 ho necessiten)
 session_start();

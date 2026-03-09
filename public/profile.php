@@ -1,3 +1,5 @@
+# Autor: ASIXcB G5 - Alberto Trujillo, Rehan Farooq, Aleix Tomas, Ian Frias Reyes
+# ------------------------------------------------------------------------------
 <?php
 // Assegurem que la sessió i la BD estiguin carregades
 require_once 'db_conn.php';

@@ -1,3 +1,5 @@
+# Autor: ASIXcB G5 - Alberto Trujillo, Rehan Farooq, Aleix Tomas, Ian Frias Reyes
+# ------------------------------------------------------------------------------
 <?php
 class SecurityModule {
     private $admin_pin = "1234"; 

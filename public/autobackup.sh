@@ -1,3 +1,5 @@
+# Autor: ASIXcB G5 - Alberto Trujillo, Rehan Farooq, Aleix Tomas, Ian Frias Reyes
+# ------------------------------------------------------------------------------
 #!/bin/bash
 # Definir nom del fitxer amb data i hora (ex: db_backup_2026-02-10_1530.sql)
 FILENAME="/docker/public/backups/db_backup_$(date +\%F_\%H\%M).sql"

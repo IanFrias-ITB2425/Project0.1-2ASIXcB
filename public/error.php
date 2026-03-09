@@ -1,3 +1,5 @@
+# Autor: ASIXcB G5 - Alberto Trujillo, Rehan Farooq, Aleix Tomas, Ian Frias Reyes
+# ------------------------------------------------------------------------------
 <?php
 // Detectem el codi d'error real enviat per Nginx
 $code = $_SERVER['REDIRECT_STATUS'] ?? $_GET['code'] ?? '404';

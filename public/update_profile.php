@@ -1,3 +1,5 @@
+# Autor: ASIXcB G5 - Alberto Trujillo, Rehan Farooq, Aleix Tomas, Ian Frias Reyes
+# ------------------------------------------------------------------------------
 <?php
 /**
  * UPDATE_PROFILE.PHP - VERSIÓN FINAL CON GESTIÓN DE SESIONES
