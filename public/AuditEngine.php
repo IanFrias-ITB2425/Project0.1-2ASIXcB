@@ -1,5 +1,3 @@
-# Autor: ASIXcB G5 - Alberto Trujillo, Rehan Farooq, Aleix Tomas, Ian Frias Reyes
-# ------------------------------------------------------------------------------
 <?php
 error_reporting(0);
 ini_set('display_errors', 0);
@@ -136,17 +134,78 @@ class AuditEngine {
     }
 
     public function executeCommand($cmd) {
-        return htmlspecialchars(shell_exec(trim($cmd) . " 2>&1") ?: " (Sin salida)");
+        $username = $_SESSION['username'] ?? 'invitado';
+        $username = preg_replace('/[^a-zA-Z0-9_-]/', '', $username); 
+
+        $base_homes = getcwd() . '/homes';
+        $user_home = $base_homes . '/' . $username;
+
+        if (!is_dir($user_home)) {
+            @mkdir($user_home, 0777, true);
+            @file_put_contents($user_home . '/bienvenida.txt', "Bienvenido a tu terminal privada, $username.\n");
+        }
+
+        if (!isset($_SESSION['cwd']) || strpos($_SESSION['cwd'], $user_home) !== 0) {
+            $_SESSION['cwd'] = $user_home;
+        }
+
+        $cmd = trim($cmd);
+        if (empty($cmd)) return "";
+
+        // Navegación enjaulada segura
+        if (preg_match('/^cd\s+(.*)$/', $cmd, $matches)) {
+            $new_dir = trim($matches[1]);
+            
+            if ($new_dir === '~' || $new_dir === '') {
+                $target = $user_home; 
+            } elseif ($new_dir[0] === '/') {
+                $target = realpath($new_dir);
+            } else {
+                $target = realpath($_SESSION['cwd'] . '/' . $new_dir);
+            }
+
+            if ($target && is_dir($target) && strpos($target, $user_home) === 0) {
+                $_SESSION['cwd'] = $target;
+                return "";
+            } else {
+                return "bash: cd: $new_dir: Permiso denegado (Restringido a tu home)";
+            }
+        }
+
+        if (strpos($cmd, 'sudo ') === 0) {
+            $allowed_sudo = ['sudo ps', 'sudo df', 'sudo du', 'sudo netstat', 'sudo docker'];
+            $is_allowed = false;
+            foreach ($allowed_sudo as $allowed) {
+                if (strpos($cmd, $allowed) === 0) {
+                    $is_allowed = true;
+                    break;
+                }
+            }
+            if (!$is_allowed) return "⚠️ Error: Uso de 'sudo' restringido.";
+        }
+
+        $original_dir = getcwd();
+        if (!@chdir($_SESSION['cwd'])) return "🔒 BLOQUEO DE SEGURIDAD: No se pudo entrar a la jaula.";
+        
+        // --- ESCUDO CONTRA TOP/NANO (Session Lock) ---
+        session_write_close(); 
+        
+        $output = shell_exec($cmd . " 2>&1");
+        @chdir($original_dir);
+
+        return htmlspecialchars($output ?: "(Sin salida)");
     }
 
     public function getTelemetry() {
+        if (session_status() === PHP_SESSION_NONE) @session_start();
+        
         return [
             'cpu'    => $this->getCPULoad(),
             'ram'    => $this->getRAMUsage(),
             'disk'   => $this->getDiskFree(),
             'uptime' => $this->getUptime(),
             'ip'     => $_SERVER['SERVER_ADDR'] ?? '127.0.0.1',
-            'cwd'    => '~',
+            'cwd'    => $_SESSION['cwd'] ?? '~',
             'docker' => $this->getDockerList()
         ];
     }

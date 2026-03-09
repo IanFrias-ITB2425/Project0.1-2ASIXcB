@@ -1,5 +1,3 @@
-# Autor: ASIXcB G5 - Alberto Trujillo, Rehan Farooq, Aleix Tomas, Ian Frias Reyes
-# ------------------------------------------------------------------------------
 <?php
 /**
  * EXTAGRAM DASHBOARD - LIGHT THEME (Extagram Feed Style)
