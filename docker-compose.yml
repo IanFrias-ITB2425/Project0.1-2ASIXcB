@@ -13,7 +13,11 @@ x-php-base: &php_base
     - /var/log/auth.log:/var/log/auth.log:ro
     - /var/log/syslog:/var/log/syslog:ro
     - /var/log/fail2ban.log:/var/log/fail2ban.log:ro
+<<<<<<< HEAD
     - /var/log/ufw.log:/var/log/ufw.log:ro   # <--- AÑADE ESTA LÍNEA AQUÍ
+=======
+    - /var/log/ufw.log:/var/log/ufw.log:ro
+>>>>>>> 6d42a5185614d5a44e045becc57471b5acfdfda7
     - /var/run/docker.sock:/var/run/docker.sock:ro
     - /usr/bin/docker:/usr/bin/docker:ro
     - /proc:/host/proc:ro
