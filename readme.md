@@ -328,34 +328,15 @@ S'ha configurat Nginx per gestionar el xifrat d'extrem a extrem:
 
 ---
 
-### Proves de Verificació per al Markdown (Nginx)
+### Proves de Verificació hardering
+> Comprovar que el servidor no exposa la versió del programari (Nginx) per evitar atacs basats en vulnerabilitats conegudes
+<img width="865" height="44" alt="Captura de pantalla de 2026-03-09 16-16-33" src="https://github.com/user-attachments/assets/ff81ac0d-c35a-4a03-b37b-4fb775058db4" />
 
-> **Prova 1: Verificació de l'ocultació de versió (Server Tokens)**
-> ```bash
-> curl -I http://localhost
-> # Resultat esperat: El camp "Server" només ha de dir "nginx", sense números.
-> 
-> ```
-> 
-> 
+> Garantir que els fitxers de configuració web no es poden modificar des de dins del contenidor, evitant injeccions de configuració en cas de compromís.
+<img width="1154" height="39" alt="Captura de pantalla de 2026-03-09 16-17-55" src="https://github.com/user-attachments/assets/9fd9c5b4-43f6-4e29-aa23-87b1d213b673" />
 
-> **Prova 2: Verificació de fitxers de configuració (Read-Only)**
-> ```bash
-> # Intentar modificar la config des de dins del contenidor
-> docker exec -it s1_nginx sh -c "echo 'hack' >> /etc/nginx/conf.d/default.conf"
-> # Resultat esperat: "Read-only file system"
-> 
-> ```
-> 
-> 
+> Verificar l'existència de les capçaleres que protegeixen els usuaris contra atacs de Clickjacking i MIME-Type Sniffing.
+<img width="1154" height="80" alt="Captura de pantalla de 2026-03-09 16-18-23" src="https://github.com/user-attachments/assets/e7e42126-8745-46dc-bf2f-db8e7c6336b8" />
 
-> **Prova 3: Verificació d'encapçalaments de seguretat**
-> ```bash
-> curl -I http://localhost | grep -E "X-Frame-Options|X-Content-Type-Options"
-> # Resultat esperat: Han d'aparèixer les línies configurades.
-> 
-> ```
-> 
-> 
 
 ---
