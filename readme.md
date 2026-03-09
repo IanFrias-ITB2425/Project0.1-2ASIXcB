@@ -330,7 +330,7 @@ S'ha configurat Nginx per gestionar el xifrat d'extrem a extrem:
 
 ### Proves de Verificació hardering
 > Comprovar que el servidor no exposa la versió del programari (Nginx) per evitar atacs basats en vulnerabilitats conegudes
-<img width="865" height="44" alt="Captura de pantalla de 2026-03-09 16-16-33" src="https://github.com/user-attachments/assets/ff81ac0d-c35a-4a03-b37b-4fb775058db4" />
+<img width="1154" height="39" alt="Captura de pantalla de 2026-03-09 16-19-24" src="https://github.com/user-attachments/assets/8ccf7138-d304-4a5a-85e9-5205c7593197" />
 
 > Garantir que els fitxers de configuració web no es poden modificar des de dins del contenidor, evitant injeccions de configuració en cas de compromís.
 <img width="1154" height="39" alt="Captura de pantalla de 2026-03-09 16-17-55" src="https://github.com/user-attachments/assets/9fd9c5b4-43f6-4e29-aa23-87b1d213b673" />
