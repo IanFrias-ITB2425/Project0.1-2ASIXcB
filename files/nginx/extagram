@@ -1,9 +1,12 @@
-# Upstream con persistencia de sesión por IP
 upstream php_backend {
     ip_hash; 
     server s2_extagram:9000;
     server s3_extagram:9000;
 }
+
+# Upstream per als estàtics (S5 i S6)
+upstream static_images { server s5_nginx:80; }
+upstream static_assets { server s6_nginx:80; }
 
 server {
     listen 443 ssl;
@@ -14,17 +17,28 @@ server {
     root /var/www/html;
     index extagram.php index.php;
 
-    # SSL - Asegúrate de que las rutas son correctas
     ssl_certificate /etc/letsencrypt/live/g5asixc2bc.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/g5asixc2bc.com/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
 
-    # FIX 1: Buffers masivos para Tokens de Google (Evita 502/504)
+    # FIX 1: Buffers per a tokens grans
     fastcgi_buffers 16 256k;
     fastcgi_buffer_size 512k;
-    fastcgi_busy_buffers_size 512k;
 
-    # FIX 2: Seguridad para dashboard.php
+    # FIX IMATGES: Envia la petició al servidor d'estàtics s5
+    location /uploads/ {
+        proxy_pass http://static_images;
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # FIX ASSETS: Envia la petició al servidor d'estàtics s6
+    location /static/ {
+        proxy_pass http://static_assets;
+        proxy_set_header Host $host;
+    }
+
+    # FIX DASHBOARD
     location = /dashboard.php {
         auth_basic "Acceso Restringido";
         auth_basic_user_file /etc/nginx/.htpasswd;
@@ -32,25 +46,11 @@ server {
         include fastcgi_params;
         fastcgi_pass php_backend;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        
-        # Parámetros críticos para sesión en Chrome
         fastcgi_param HTTPS on;
         fastcgi_param HTTP_AUTHORIZATION $http_authorization;
-        fastcgi_param REQUEST_SCHEME https;
     }
 
-    # FIX 3: Manejo de login y callbacks de Google
-    location ~ /(profile|google-callback|login)\.php$ {
-        include fastcgi_params;
-        fastcgi_pass php_backend;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param HTTPS on;
-        
-        # Evitar que el navegador cachee una sesión fallida
-        add_header Cache-Control "no-store, no-cache, must-revalidate, max-age=0";
-    }
-
-    # Configuración PHP general
+    # PHP General
     location ~ \.php$ {
         try_files $uri =404;
         include fastcgi_params;
@@ -59,9 +59,8 @@ server {
         fastcgi_param HTTPS on;
     }
 
-    # Proxy para Grafana
     location /grafana/ {
-        proxy_pass http://grafana:3000/;
+        proxy_pass http://s9_grafana:3000/;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-Proto https;
     }
@@ -71,7 +70,6 @@ server {
     }
 }
 
-# Redirección forzada a HTTPS
 server {
     listen 80;
     server_name g5asixc2bc.com www.g5asixc2bc.com;

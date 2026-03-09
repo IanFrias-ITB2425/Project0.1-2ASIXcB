@@ -1,31 +1,32 @@
 <?php
 // /docker/public/db_conn.php
 
-// 1. Buffer de salida para evitar errores de "Headers already sent"
+// 1. Buffer de sortida
 ob_start();
 
-// 2. Configuración de REDIS para sesiones (Siempre antes de session_start)
-// Asegúrate de que el host 's8_redis' coincide con tu docker-compose
+// 2. CONFIGURACIÓ DE REDIS AMB AUTENTICACIÓ (Hardening)
+// La sintaxi correcta per a phpredis amb password és: tcp://host:port?auth=password
+$redis_pass = 'Redis_Pass_2026!'; 
 ini_set('session.save_handler', 'redis');
-ini_set('session.save_path', 'tcp://s8_redis:6379');
+ini_set('session.save_path', "tcp://s8_redis:6379?auth=$redis_pass");
 
-// 3. Inicio de Sesión Controlado
-// Solo iniciamos si no hay una sesión activa previa
+// 3. Inici de Sessió Controlat
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 4. Conexión a Base de Datos MySQL
+// 4. Conexió a MySQL AMB CREDENCIALS ACTUALITZADES
 $servername = "s7_mysql";
 $username   = "extagram_admin";
-$password   = "pass123";
+$password   = "User_Secure_Pass_99!"; // La nova clau que hem posat al Compose
 $dbname     = "extagram_db";
 
 try {
     $db = new PDO("mysql:host=$servername;dbname=$dbname;charset=utf8", $username, $password);
-    // Modo de errores estricto para depuración
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-    die("Error de conexión a la Base de Datos: " . $e->getMessage());
+    // Hardening extra: No mostris l'error real a l'usuari final per evitar leak de rutes
+    error_log("DB Error: " . $e->getMessage());
+    die("Error crític de connexió. Contacta amb l'administrador.");
 }
 ?>
