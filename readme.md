@@ -328,15 +328,27 @@ S'ha configurat Nginx per gestionar el xifrat d'extrem a extrem:
 
 ---
 
-### Proves de Verificació hardering
+### Proves de Verificació hardering de sistema
 > Comprovar que el servidor no exposa la versió del programari (Nginx) per evitar atacs basats en vulnerabilitats conegudes
-<img width="1154" height="39" alt="Captura de pantalla de 2026-03-09 16-19-24" src="https://github.com/user-attachments/assets/8ccf7138-d304-4a5a-85e9-5205c7593197" />
+> <img width="1154" height="39" alt="Captura de pantalla de 2026-03-09 16-19-24" src="https://github.com/user-attachments/assets/8ccf7138-d304-4a5a-85e9-5205c7593197" />
 
 > Garantir que els fitxers de configuració web no es poden modificar des de dins del contenidor, evitant injeccions de configuració en cas de compromís.
-<img width="1154" height="39" alt="Captura de pantalla de 2026-03-09 16-17-55" src="https://github.com/user-attachments/assets/9fd9c5b4-43f6-4e29-aa23-87b1d213b673" />
+> <img width="1154" height="39" alt="Captura de pantalla de 2026-03-09 16-17-55" src="https://github.com/user-attachments/assets/9fd9c5b4-43f6-4e29-aa23-87b1d213b673" />
 
 > Verificar l'existència de les capçaleres que protegeixen els usuaris contra atacs de Clickjacking i MIME-Type Sniffing.
-<img width="1154" height="80" alt="Captura de pantalla de 2026-03-09 16-18-23" src="https://github.com/user-attachments/assets/e7e42126-8745-46dc-bf2f-db8e7c6336b8" />
+> <img width="1154" height="80" alt="Captura de pantalla de 2026-03-09 16-18-23" src="https://github.com/user-attachments/assets/e7e42126-8745-46dc-bf2f-db8e7c6336b8" />
 
+#Proves de Veritifació hardering db
+> Assegurar que el servei de base de dades no és accessible des de la interfície de xarxa pública.
+> <img width="555" height="59" alt="Captura de pantalla de 2026-03-09 16-30-37" src="https://github.com/user-attachments/assets/ee625e04-5983-4d69-8266-4f06a1816009" />
+
+>Desactivar la lectura de fitxers locals per part del motor de base de dades (mitigació d'SQLi).
+> <img width="1293" height="94" alt="Captura de pantalla de 2026-03-09 16-31-31" src="https://github.com/user-attachments/assets/9d0fc596-320d-45bb-831e-e83c827575c7" />
+
+>Assegurar que no s'exposa informació del motor i que es compleix el principi de menor privilegi.
+> <img width="1432" height="167" alt="Captura de pantalla de 2026-03-09 16-32-40" src="https://github.com/user-attachments/assets/a6adb5ab-5b25-4771-a0cf-94c73968e4f4" />
+
+>Garantir que el motor de dades està preparat per a comunicacions xifrades.
+> <img width="1232" height="562" alt="Captura de pantalla de 2026-03-09 16-33-36" src="https://github.com/user-attachments/assets/161718ed-ffa7-44c9-85d0-24979f56d128" />
 
 ---
