@@ -1,7 +1,19 @@
-# Autor: ASIXcB G5 - Alberto Trujillo, Rehan Farooq, Aleix Tomas, Ian Frias Reyes
-# ------------------------------------------------------------------------------
 <?php
-// auth_session.php
+// ==========================================
+// 1. CONFIGURACIÓN DE SEGURIDAD PARA CHROME
+// ==========================================
+// Esto es VITAL para que Chrome no rechace la sesión
+ini_set('session.cookie_httponly', 1);
+ini_set('session.use_only_cookies', 1);
+ini_set('session.cookie_samesite', 'Lax'); 
+
+// Configuración de Redis (La que definimos en tu docker-compose)
+ini_set('session.save_handler', 'redis');
+ini_set('session.save_path', 'tcp://s8_redis:6379?auth=Redis_Pass_2026!');
+
+// ==========================================
+// 2. INICIO DE SESIÓN
+// ==========================================
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
