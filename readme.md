@@ -338,7 +338,7 @@ S'ha configurat Nginx per gestionar el xifrat d'extrem a extrem:
 > Verificar l'existència de les capçaleres que protegeixen els usuaris contra atacs de Clickjacking i MIME-Type Sniffing.
 > <img width="1154" height="80" alt="Captura de pantalla de 2026-03-09 16-18-23" src="https://github.com/user-attachments/assets/e7e42126-8745-46dc-bf2f-db8e7c6336b8" />
 
-#Proves de Veritifació hardering db
+### Proves de Veritifació hardering db
 > Assegurar que el servei de base de dades no és accessible des de la interfície de xarxa pública.
 > <img width="555" height="59" alt="Captura de pantalla de 2026-03-09 16-30-37" src="https://github.com/user-attachments/assets/ee625e04-5983-4d69-8266-4f06a1816009" />
 
