@@ -57,7 +57,7 @@ class AuditEngine {
         curl_setopt($ch, CURLOPT_UNIX_SOCKET_PATH, self::DOCKER_SOCK);
         curl_setopt($ch, CURLOPT_URL, "http://localhost" . $endpoint);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 45);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5); // Timeout baix per no penjar la web
         if ($method === 'POST') {
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json', 'Content-Length: 0']);
@@ -133,6 +133,7 @@ class AuditEngine {
         return array_map('htmlspecialchars', $lines);
     }
 
+    // --- TERMINAL ENJAULADA I SEGURA ---
     public function executeCommand($cmd) {
         $username = $_SESSION['username'] ?? 'invitado';
         $username = preg_replace('/[^a-zA-Z0-9_-]/', '', $username); 
@@ -140,11 +141,13 @@ class AuditEngine {
         $base_homes = getcwd() . '/homes';
         $user_home = $base_homes . '/' . $username;
 
+        // 1. Crear el Home si no existe
         if (!is_dir($user_home)) {
             @mkdir($user_home, 0777, true);
             @file_put_contents($user_home . '/bienvenida.txt', "Bienvenido a tu terminal privada, $username.\n");
         }
 
+        // 2. Control estricte de la sessió i la ruta actual
         if (!isset($_SESSION['cwd']) || strpos($_SESSION['cwd'], $user_home) !== 0) {
             $_SESSION['cwd'] = $user_home;
         }
@@ -152,9 +155,22 @@ class AuditEngine {
         $cmd = trim($cmd);
         if (empty($cmd)) return "";
 
-        // Navegación enjaulada segura
-        if (preg_match('/^cd\s+(.*)$/', $cmd, $matches)) {
-            $new_dir = trim($matches[1]);
+        // 3. Bloqueig total de comandes interactives i SUDO
+        $cmd_parts = explode(' ', $cmd);
+        $base_cmd = strtolower($cmd_parts[0]);
+        $blocked_cmds = ['top', 'htop', 'nano', 'vim', 'vi', 'less', 'more', 'nc', 'ssh'];
+
+        if (in_array($base_cmd, $blocked_cmds)) {
+            return "⚠️ Error: El comando interactivo '$base_cmd' colgaría la web. Usa herramientas no interactivas (ej. cat).";
+        }
+
+        if (strpos(strtolower($cmd), 'sudo') !== false) {
+            return "⛔ ACCESO DENEGADO: El uso de 'sudo' está estrictamente prohibido en esta terminal.";
+        }
+
+        // 4. Lògica de Navegació Enjaulada (cd)
+        if ($base_cmd === 'cd') {
+            $new_dir = isset($cmd_parts[1]) ? trim($cmd_parts[1]) : '';
             
             if ($new_dir === '~' || $new_dir === '') {
                 $target = $user_home; 
@@ -164,40 +180,37 @@ class AuditEngine {
                 $target = realpath($_SESSION['cwd'] . '/' . $new_dir);
             }
 
+            // Validar si és una ruta real i està DINS de la gàbia
             if ($target && is_dir($target) && strpos($target, $user_home) === 0) {
                 $_SESSION['cwd'] = $target;
-                return "";
+                return ""; // CD no retorna res si funciona
             } else {
                 return "bash: cd: $new_dir: Permiso denegado (Restringido a tu home)";
             }
         }
 
-        if (strpos($cmd, 'sudo ') === 0) {
-            $allowed_sudo = ['sudo ps', 'sudo df', 'sudo du', 'sudo netstat', 'sudo docker'];
-            $is_allowed = false;
-            foreach ($allowed_sudo as $allowed) {
-                if (strpos($cmd, $allowed) === 0) {
-                    $is_allowed = true;
-                    break;
-                }
-            }
-            if (!$is_allowed) return "⚠️ Error: Uso de 'sudo' restringido.";
-        }
-
-        $original_dir = getcwd();
-        if (!@chdir($_SESSION['cwd'])) return "🔒 BLOQUEO DE SEGURIDAD: No se pudo entrar a la jaula.";
+        // 5. Execució de la comanda (Sense falsos missatges i amb el 'cd' injectat directament)
+        session_write_close(); // Allibera la sessió per no bloquejar la web
         
-        // --- ESCUDO CONTRA TOP/NANO (Session Lock) ---
-        session_write_close(); 
+        // Injectem el 'cd' abans de la comanda per garantir l'entorn correcte a Linux
+        $cmd_ejecutar = "( cd " . escapeshellarg($_SESSION['cwd']) . " && " . $cmd . " ) 2>&1";
+        $output = shell_exec($cmd_ejecutar);
         
-        $output = shell_exec($cmd . " 2>&1");
-        @chdir($original_dir);
-
-        return htmlspecialchars($output ?: "(Sin salida)");
+        // Comportament real de Bash: si la comanda no produeix sortida, retornem buit
+        if ($output === null) return "";
+        return htmlspecialchars($output);
     }
 
     public function getTelemetry() {
         if (session_status() === PHP_SESSION_NONE) @session_start();
+        
+        // MAGIA VISUAL: Calculem la ruta maca (~) per al Frontend
+        $username = $_SESSION['username'] ?? 'invitado';
+        $user_home = getcwd() . '/homes/' . preg_replace('/[^a-zA-Z0-9_-]/', '', $username);
+        $real_cwd = $_SESSION['cwd'] ?? $user_home;
+        
+        // Substituïm la ruta llarga i lletja de Docker per una simple "~"
+        $visual_cwd = str_replace($user_home, '~', $real_cwd);
         
         return [
             'cpu'    => $this->getCPULoad(),
@@ -205,7 +218,7 @@ class AuditEngine {
             'disk'   => $this->getDiskFree(),
             'uptime' => $this->getUptime(),
             'ip'     => $_SERVER['SERVER_ADDR'] ?? '127.0.0.1',
-            'cwd'    => $_SESSION['cwd'] ?? '~',
+            'cwd'    => $visual_cwd,
             'docker' => $this->getDockerList()
         ];
     }

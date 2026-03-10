@@ -2,8 +2,12 @@
 bantime  = 600
 findtime = 600
 maxretry = 3
-action   = %(action_mwl)s
-           discord
+
+destemail = alberto.trujillo.7e6@itb.cat
+sender    = root@ip-172-31-24-116.ec2.internal
+
+action = %(action_mwl)s
+         discord
 
 [sshd]
 enabled = true
