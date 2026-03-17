@@ -16,6 +16,9 @@ x-php-base: &php_base
     - /var/log/ufw.log:/var/log/ufw.log:ro
     - /var/run/docker.sock:/var/run/docker.sock:ro
     - /usr/bin/docker:/usr/bin/docker:ro
+    - /var/log/nginx:/var/log/nginx:ro
+    - /var/log/syslog:/var/log/syslog:ro
+    - /var/log/auth.log:/var/log/auth.log:ro
     - /proc:/host/proc:ro
     - /etc:/host/etc:ro
     - /sys:/host/sys:ro
