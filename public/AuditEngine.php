@@ -260,10 +260,23 @@ try {
             case 'telemetry': echo json_encode($engine->getTelemetry()); break;
             case 'processes': echo json_encode($engine->getProcesses()); break;
             case 'storage': echo json_encode($engine->getStorage()); break;
+            
+            // Logs de Seguridad (Los que ya tenías)
             case 'fail2ban_logs': echo json_encode($engine->readLog('/var/log/fail2ban.log')); break;
             case 'ufw_logs': echo json_encode($engine->readLog('/var/log/ufw.log')); break;
+            
+            // --- NUEVOS: Logs de Infraestructura (Nginx del Host) ---
+            case 'nginx_access': echo json_encode($engine->readLog('/var/log/nginx/access.log')); break;
+            case 'nginx_error': echo json_encode($engine->readLog('/var/log/nginx/error.log')); break;
+            
+            // --- NUEVO: Logs del Sistema y Docker Daemon ---
+            case 'syslog': echo json_encode($engine->readLog('/var/log/syslog')); break;
+            case 'auth_logs': echo json_encode($engine->readLog('/var/log/auth.log')); break;
+
             default: echo json_encode(['error' => 'Invalid action']);
         }
+    }
+    
     } else {
         echo json_encode(['status' => 'AuditEngine V6 Online']);
     }
