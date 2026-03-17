@@ -247,6 +247,16 @@ if (empty($_SESSION['csrf_token'])) {
                     <button onclick="switchTab('ufw')" id="btn-ufw" class="tab-btn px-4 py-3 text-[13px] font-medium text-slate-600 hover:text-slate-900 transition-colors rounded-t-xl whitespace-nowrap flex items-center gap-2">
                         <i data-lucide="lock" class="w-4 h-4 text-amber-500"></i> UFW
                     </button>
+
+                    <button onclick="switchTab('nginx_access')" id="btn-nginx_access" class="tab-btn px-4 py-3 text-[13px] font-medium text-slate-600 hover:text-slate-900 transition-colors rounded-t-xl whitespace-nowrap flex items-center gap-2">
+                        <i data-lucide="globe" class="w-4 h-4 text-sky-500"></i> Nginx Web
+                    </button>
+                    <button onclick="switchTab('syslog')" id="btn-syslog" class="tab-btn px-4 py-3 text-[13px] font-medium text-slate-600 hover:text-slate-900 transition-colors rounded-t-xl whitespace-nowrap flex items-center gap-2">
+                        <i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i> Syslog
+                    </button>
+                    <button onclick="switchTab('auth_logs')" id="btn-auth_logs" class="tab-btn px-4 py-3 text-[13px] font-medium text-slate-600 hover:text-slate-900 transition-colors rounded-t-xl whitespace-nowrap flex items-center gap-2">
+                        <i data-lucide="key" class="w-4 h-4 text-orange-500"></i> Auth/SSH
+                    </button>
                 </div>
 
                 <div id="tab-terminal" class="tab-content active flex-col flex-1 overflow-hidden bg-[#0f172a] terminal-scroll relative">
