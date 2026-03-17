@@ -351,4 +351,8 @@ S'ha configurat Nginx per gestionar el xifrat d'extrem a extrem:
 >Garantir que el motor de dades està preparat per a comunicacions xifrades.
 > <img width="1232" height="562" alt="Captura de pantalla de 2026-03-09 16-33-36" src="https://github.com/user-attachments/assets/161718ed-ffa7-44c9-85d0-24979f56d128" />
 
+
+***Proves WAF***
+<img width="732" height="223" alt="image" src="https://github.com/user-attachments/assets/e9dcb818-b029-4024-9113-66943f116344" />
+
 ---
