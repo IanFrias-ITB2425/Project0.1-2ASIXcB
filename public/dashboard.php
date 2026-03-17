@@ -544,61 +544,90 @@ if (empty($_SESSION['csrf_token'])) {
         }
 
         async function loadTabContent(tabName) {
+            // 1. Definimos qué pestañas se comportan como "Logs de texto"
+            const logTabs = ['fail2ban', 'ufw', 'nginx_access', 'syslog', 'auth_logs'];
+            
             try {
+                // --- CASO A: PROCESOS ---
                 if (tabName === 'processes') {
                     const res = await fetch(`AuditEngine.php?action=processes`);
                     const data = await res.json();
                     let html = '';
-                    if(data.error) html = `<tr><td colspan="6" class="p-4 text-rose-500">${data.error}</td></tr>`;
-                    else {
+                    if(data.error) {
+                        html = `<tr><td colspan="6" class="p-4 text-rose-500">${data.error}</td></tr>`;
+                    } else {
                         data.forEach(p => {
-                            // Bloquejar botó visualment si és crític
                             const isCritical = CRITICAL_PROCESSES.some(sw => p.command.toLowerCase().includes(sw));
                             const btnHtml = isCritical 
-                                ? `<button disabled class="p-1.5 bg-slate-100 text-slate-400 rounded cursor-not-allowed" title="Protegit pel sistema"><i data-lucide="shield" class="w-4 h-4"></i></button>`
-                                : `<button onclick="killProcess('${p.pid}', '${p.command}')" class="p-1.5 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded transition-colors" title="Matar (Kill)"><i data-lucide="x-circle" class="w-4 h-4"></i></button>`;
-
+                                ? `<button disabled class="p-1.5 bg-slate-100 text-slate-400 rounded cursor-not-allowed" title="Protegit"><i data-lucide="shield" class="w-4 h-4"></i></button>`
+                                : `<button onclick="killProcess('${p.pid}', '${p.command}')" class="p-1.5 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>`;
+                            
                             html += `
-                                <tr class="hover:bg-slate-50 transition-colors">
-                                    <td class="p-3 font-bold text-slate-800">${p.pid}</td>
-                                    <td class="p-3">${p.user}</td>
-                                    <td class="p-3"><span class="${parseFloat(p.cpu) > 50 ? 'text-rose-500 font-bold' : ''}">${p.cpu}%</span></td>
-                                    <td class="p-3">${p.mem}%</td>
-                                    <td class="p-3 text-slate-500 truncate max-w-xs" title="${p.command}">${p.command}</td>
+                                <tr class="hover:bg-slate-50 border-b border-slate-100 transition-colors">
+                                    <td class="p-3 font-bold text-blue-600">${p.pid}</td>
+                                    <td class="p-3 text-slate-500">${p.user}</td>
+                                    <td class="p-3 font-mono">${p.cpu}%</td>
+                                    <td class="p-3 font-mono">${p.ram}%</td>
+                                    <td class="p-3 truncate max-w-[200px]" title="${p.command}">${p.command}</td>
                                     <td class="p-3 text-right">${btnHtml}</td>
-                                </tr>
-                            `;
+                                </tr>`;
                         });
                     }
                     document.getElementById('processes-list').innerHTML = html;
-                    lucide.createIcons();
-                    return;
-                }
-
-                if (tabName === 'storage') {
+                    lucide.createIcons({ root: document.getElementById('processes-list') });
+        
+                // --- CASO B: DISCOS (STORAGE) ---
+                } else if (tabName === 'storage') {
                     const res = await fetch(`AuditEngine.php?action=storage`);
                     const data = await res.json();
                     let html = '';
-                    if(data.error) html = `<tr><td colspan="6" class="p-4 text-rose-500">${data.error}</td></tr>`;
-                    else {
+                    if(data.error) {
+                        html = `<tr><td colspan="6" class="p-4 text-rose-500">${data.error}</td></tr>`;
+                    } else {
                         data.forEach(d => {
                             const useNum = parseInt(d.use.replace('%',''));
                             const colorClass = useNum > 85 ? 'text-rose-500 font-bold' : (useNum > 70 ? 'text-amber-500 font-bold' : 'text-emerald-600');
                             html += `
-                                <tr class="hover:bg-slate-50 transition-colors">
+                                <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
                                     <td class="p-3 font-bold text-slate-700">${d.fs}</td>
                                     <td class="p-3">${d.size}</td>
                                     <td class="p-3">${d.used}</td>
                                     <td class="p-3">${d.avail}</td>
                                     <td class="p-3 ${colorClass}">${d.use}</td>
-                                    <td class="p-3 text-slate-500">${d.mount}</td>
-                                </tr>
-                            `;
+                                    <td class="p-3 text-slate-500 text-xs">${d.mount}</td>
+                                </tr>`;
                         });
                     }
                     document.getElementById('storage-list').innerHTML = html;
-                    return;
+        
+                // --- CASO C: TODOS LOS LOGS (Fail2ban, UFW, Nginx, Syslog, Auth) ---
+                } else if (logTabs.includes(tabName)) {
+                    const targetEl = document.getElementById(`tab-${tabName}`);
+                    const action = (tabName === 'fail2ban') ? 'fail2ban_logs' : (tabName === 'ufw' ? 'ufw_logs' : tabName);
+                    
+                    const res = await fetch(`AuditEngine.php?action=${action}`);
+                    const data = await res.json();
+                    
+                    if (Array.isArray(data)) {
+                        let html = data.map(line => {
+                            let color = 'text-slate-600';
+                            // Resaltado de seguridad
+                            if (/Ban|Deny|Failed|ERROR|Critical/i.test(line)) color = 'text-rose-600 font-bold';
+                            if (/Allow|Accepted|Found|OK/i.test(line)) color = 'text-emerald-600';
+                            
+                            return `<div class="${color} border-b border-slate-200/40 pb-1 break-all hover:bg-white/50 transition-colors font-mono text-[12px]">${line}</div>`;
+                        }).join('');
+                        
+                        targetEl.innerHTML = html || '<div class="text-slate-400 italic p-4">No hi ha registres recents.</div>';
+                    } else {
+                        targetEl.innerHTML = `<div class="p-4 text-rose-500 font-bold bg-rose-50 rounded-lg m-2 border border-rose-100">${data.error || 'Error carregant log'}</div>`;
+                    }
                 }
+            } catch (e) {
+                console.error("Error en loadTabContent:", e);
+                showToast("Error en carregar el contingut de la pestanya", "error");
+            }
+        }
 
                 // Els teus antics logs (Fail2ban, UFW...)
                 const endpointMap = { 'fail2ban': 'fail2ban_logs', 'ufw': 'ufw_logs' };
